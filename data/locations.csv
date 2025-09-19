@@ -1,0 +1,4 @@
+id,name,flavor_ids,monster_ids,loot_table_id,danger_level,event_ids
+crypt,Cripta húmeda,flavor_crypt1;flavor_crypt2;flavor_crypt3,goblin;skeleton;zombie;ghost,crypt_loot,1,deposito;pasillo;enemigo
+forest,Bosque oscuro,flavor_forest1;flavor_forest2;flavor_forest3,wolf;bandit;orc;spider,basic_treasure,2,deposito;pasillo;enemigo
+ruins,Ruinas antiguas,flavor_ruins1;flavor_ruins2;flavor_ruins3,slime;bat;cultist;knight,basic_treasure,3,deposito;pasillo;enemigo

@@ -1,0 +1,6 @@
+id,name,effect
+gold_small,Pequeña bolsa de oro,+10 oro
+gold_medium,Bolsa mediana de oro,+25 oro
+potion_small,Poción menor de curación,+5 HP
+potion_medium,Poción de curación,+10 HP
+nothing,Nada,Sin efecto

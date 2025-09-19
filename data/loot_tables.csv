@@ -1,0 +1,10 @@
+id,item_id,weight
+basic_treasure,gold_small,50
+basic_treasure,potion_small,20
+basic_treasure,dagger,10
+basic_treasure,nothing,20
+crypt_loot,gold_medium,40
+crypt_loot,potion_small,25
+crypt_loot,short_sword,15
+crypt_loot,chainmail,10
+crypt_loot,nothing,10

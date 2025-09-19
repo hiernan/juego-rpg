@@ -1,0 +1,43 @@
+[gd_scene load_steps=3 format=3 uid="uid://cyjy70hhwktt5"]
+
+[ext_resource type="Script" uid="uid://da0t2gdtu18ol" path="res://scripts/town.gd" id="1_f2a5t"]
+[ext_resource type="Texture2D" uid="uid://bt5lr0yfbnjp5" path="res://Images/FondoSimple1.png" id="2_ms2es"]
+
+[node name="Town" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_f2a5t")
+
+[node name="TextureRectFondo" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_ms2es")
+expand_mode = 3
+stretch_mode = 6
+
+[node name="ButtonTablon" type="Button" parent="."]
+layout_mode = 0
+offset_left = 434.0
+offset_top = 407.0
+offset_right = 592.0
+offset_bottom = 438.0
+text = "Tablon de anuncios"
+
+[node name="ButtonRecargarDatos" type="Button" parent="."]
+layout_mode = 0
+offset_left = 1013.0
+offset_top = 605.0
+offset_right = 1139.0
+offset_bottom = 636.0
+text = "Recargar Datos"
+
+[connection signal="pressed" from="ButtonTablon" to="." method="_on_button_tablon_pressed"]
+[connection signal="pressed" from="ButtonRecargarDatos" to="." method="_on_button_recargar_datos_pressed"]

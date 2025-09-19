@@ -1,0 +1,138 @@
+[gd_scene load_steps=2 format=3 uid="uid://dbdaq5gra3g"]
+
+[ext_resource type="Script" uid="uid://bd2c2v7xbbfod" path="res://scripts/mission.gd" id="1_egi7e"]
+
+[node name="Mission" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_egi7e")
+
+[node name="LabelTitulo" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -61.0
+offset_top = 14.0
+offset_right = 61.0
+offset_bottom = 37.0
+grow_horizontal = 2
+text = "Misión en curso"
+horizontal_alignment = 1
+
+[node name="ButtonAbandonar" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -47.5
+offset_top = -31.0
+offset_right = 47.5
+grow_horizontal = 2
+grow_vertical = 0
+text = "Abandonar"
+
+[node name="TimerTick" type="Timer" parent="."]
+unique_name_in_owner = true
+wait_time = 1.5
+
+[node name="TimerDots" type="Timer" parent="."]
+unique_name_in_owner = true
+
+[node name="AudioBell" type="AudioStreamPlayer" parent="."]
+unique_name_in_owner = true
+
+[node name="HSplitContainer" type="HSplitContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.28300002
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -288.01602
+offset_top = 45.0
+offset_right = -35.0
+offset_bottom = -39.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+split_offset = 800
+dragging_enabled = false
+
+[node name="RichTextLog" type="RichTextLabel" parent="HSplitContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+bbcode_enabled = true
+scroll_following = true
+vertical_alignment = 2
+
+[node name="RightPanel" type="PanelContainer" parent="HSplitContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="HSplitContainer/RightPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HSplitContainer/RightPanel/MarginContainer"]
+layout_mode = 2
+
+[node name="RightTitle" type="Label" parent="HSplitContainer/RightPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Botín de esta misión"
+
+[node name="RunLootLog" type="RichTextLabel" parent="HSplitContainer/RightPanel/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+fit_content = true
+
+[node name="ResultOverlay" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="ResultOverlay"]
+layout_mode = 2
+theme_override_constants/margin_left = 400
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 400
+theme_override_constants/margin_bottom = 32
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ResultOverlay/MarginContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="ResultTitle" type="Label" parent="ResultOverlay/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Resultado"
+horizontal_alignment = 1
+
+[node name="ResultSummary" type="RichTextLabel" parent="ResultOverlay/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+fit_content = true
+
+[node name="ButtonVolver" type="Button" parent="ResultOverlay/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Volver al pueblo"
+
+[connection signal="pressed" from="ButtonAbandonar" to="." method="_on_button_abandonar_pressed"]
+[connection signal="timeout" from="TimerTick" to="." method="_on_timer_tick_timeout"]
+[connection signal="timeout" from="TimerDots" to="." method="_on_timer_dots_timeout"]
+[connection signal="pressed" from="ResultOverlay/MarginContainer/VBoxContainer/ButtonVolver" to="." method="_on_button_volver_pressed"]

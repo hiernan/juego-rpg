@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://dq6j6ce13n5ey"
+
+[deps]
+
+files=["res://data/locations.name.translation", "res://data/locations.flavor.translation", "res://data/locations.monster.translation", "res://data/locations.loot.translation", "res://data/locations.danger.translation", "res://data/locations.event.translation"]
+
+source_file="res://data/locations.csv"
+dest_files=["res://data/locations.name.translation", "res://data/locations.flavor.translation", "res://data/locations.monster.translation", "res://data/locations.loot.translation", "res://data/locations.danger.translation", "res://data/locations.event.translation"]
+
+[params]
+
+compress=true
+delimiter=0

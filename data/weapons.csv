@@ -1,0 +1,11 @@
+id,name,dmg_min,dmg_max,price
+dagger,Daga,1,3,10
+short_sword,Espada corta,2,4,20
+long_sword,Espada larga,3,6,50
+axe,Hacha,3,7,60
+mace,Maza,2,6,45
+bow,Arco corto,2,5,40
+crossbow,Ballesta,3,6,55
+spear,Lanza,2,5,35
+greatsword,Espadón,4,8,80
+warhammer,Martillo de guerra,5,9,100
