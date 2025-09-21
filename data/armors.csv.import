@@ -3,13 +3,11 @@
 importer="csv_translation"
 type="Translation"
 uid="uid://cb7feqlhgcbwl"
+valid=false
 
 [deps]
 
-files=["res://data/armors.name.translation", "res://data/armors.armor.translation", "res://data/armors.price.translation"]
-
 source_file="res://data/armors.csv"
-dest_files=["res://data/armors.name.translation", "res://data/armors.armor.translation", "res://data/armors.price.translation"]
 
 [params]
 

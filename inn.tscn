@@ -1,0 +1,213 @@
+[gd_scene load_steps=3 format=3 uid="uid://ybq5rcuyixoy"]
+
+[ext_resource type="Script" uid="uid://b0ihkkap78sc" path="res://inn.gd" id="1_hxmhp"]
+[ext_resource type="Texture2D" uid="uid://3e8r2mu8g7n0" path="res://Images/Fondo_Taberrna.png" id="1_xqktd"]
+
+[node name="Inn" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hxmhp")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -100.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_xqktd")
+expand_mode = 5
+stretch_mode = 4
+
+[node name="SheetPanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SheetVBox" type="VBoxContainer" parent="SheetPanel"]
+layout_mode = 2
+
+[node name="TopBar" type="HBoxContainer" parent="SheetPanel/SheetVBox"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="SheetPanel/SheetVBox/TopBar"]
+layout_mode = 2
+text = "Hoja de personaje"
+horizontal_alignment = 1
+
+[node name="TopSpacer" type="Control" parent="SheetPanel/SheetVBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BtnCerrar" type="Button" parent="SheetPanel/SheetVBox/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Cerrar"
+
+[node name="RootSplit" type="HSplitContainer" parent="SheetPanel/SheetVBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+split_offset = 700
+
+[node name="LeftSide" type="VSplitContainer" parent="SheetPanel/SheetVBox/RootSplit"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="InfoPanel" type="PanelContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer"]
+layout_mode = 2
+
+[node name="LabelName" type="Label" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Nombre:"
+
+[node name="LabelLevel" type="Label" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Nivel: "
+
+[node name="LabelHP" type="Label" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "HP:"
+
+[node name="LabelGold" type="Label" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Oro:"
+
+[node name="LabelStats" type="Label" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Stats:"
+
+[node name="BottomSplit" type="HSplitContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide"]
+layout_mode = 2
+split_offset = 400
+
+[node name="EquipPanel" type="PanelContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/BottomSplit"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/BottomSplit/EquipPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="EquipGrid" type="GridContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/BottomSplit/EquipPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 3
+
+[node name="Slot_Weapon" type="Button" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/BottomSplit/EquipPanel/MarginContainer/EquipGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Arma"
+
+[node name="Slot_Armor" type="Button" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/BottomSplit/EquipPanel/MarginContainer/EquipGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Armadura"
+
+[node name="InvPanel" type="PanelContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/BottomSplit"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/BottomSplit/InvPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="InvVBox" type="VBoxContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/BottomSplit/InvPanel/MarginContainer"]
+layout_mode = 2
+
+[node name="InvTitle" type="Label" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/BottomSplit/InvPanel/MarginContainer/InvVBox"]
+layout_mode = 2
+text = "Inventario"
+
+[node name="InvList" type="ItemList" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/BottomSplit/InvPanel/MarginContainer/InvVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 220)
+layout_mode = 2
+size_flags_vertical = 3
+allow_reselect = true
+same_column_width = true
+
+[node name="InvButtons" type="HBoxContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/BottomSplit/InvPanel/MarginContainer/InvVBox"]
+layout_mode = 2
+
+[node name="BtnEquipar" type="Button" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/BottomSplit/InvPanel/MarginContainer/InvVBox/InvButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+disabled = true
+text = "Equipar"
+
+[node name="BtnEnviarBaul" type="Button" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/BottomSplit/InvPanel/MarginContainer/InvVBox/InvButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+disabled = true
+text = "Enviar al Baúl"
+
+[node name="BaulPanel" type="PanelContainer" parent="SheetPanel/SheetVBox/RootSplit"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="SheetPanel/SheetVBox/RootSplit/BaulPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="BaulVBox" type="VBoxContainer" parent="SheetPanel/SheetVBox/RootSplit/BaulPanel/MarginContainer"]
+layout_mode = 2
+
+[node name="BaulTitle" type="Label" parent="SheetPanel/SheetVBox/RootSplit/BaulPanel/MarginContainer/BaulVBox"]
+layout_mode = 2
+text = "Baúl"
+
+[node name="BaulList" type="ItemList" parent="SheetPanel/SheetVBox/RootSplit/BaulPanel/MarginContainer/BaulVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 220)
+layout_mode = 2
+size_flags_vertical = 3
+allow_reselect = true
+
+[node name="BaulButtons" type="HBoxContainer" parent="SheetPanel/SheetVBox/RootSplit/BaulPanel/MarginContainer/BaulVBox"]
+layout_mode = 2
+
+[node name="BtnRetirar" type="Button" parent="SheetPanel/SheetVBox/RootSplit/BaulPanel/MarginContainer/BaulVBox/BaulButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+disabled = true
+text = "Retirar al inventario"
+
+[node name="ChestButton" type="TextureButton" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 785.0
+offset_top = 405.0
+offset_right = 1065.0
+offset_bottom = 625.0

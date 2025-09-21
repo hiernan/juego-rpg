@@ -18,9 +18,11 @@ var avatar := {
 	"dex": 5,
 	"init": 5,
 	"gold": 0,
-	"weapon_id": "sword_short",	# puede ser "" si está en bolas
-	"armor_id": "leather",			# puede ser "" si está en bolas
-	"inventory": []					# lista de ids (placeholder por ahora)
+	"weapon_id": "",            # sin arma equipada al arrancar
+	"armor_id":  "",            # sin armadura equipada al arrancar
+
+	"inventory": [ "short_sword", "leather_armor" ],
+	"stash":     [ "long_sword", "chain_mail" ],
 }
 
 # --- Estado de misión seleccionada ---
