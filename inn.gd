@@ -594,24 +594,7 @@ func _is_stackable(id: String) -> bool:
 	return bool(row.get("stackable", false))
 
 func _count_in_container(container: String, id: String) -> int:
-	var arr: Array = []
-	if container == "inventory":
-		arr = GameData.avatar.get("inventory", [])
-	elif container == "stash":
-		arr = GameData.avatar.get("stash", [])
-	elif container.begins_with("equipped"):
-		var cur := String(GameData._get_container_ref(container))
-		return 1 if cur == id else 0
-	else:
-		var any = GameData._get_container_ref(container)
-		if typeof(any) == TYPE_ARRAY:
-			arr = any
-
-	var c: int = 0
-	for x in arr:
-		if String(x) == id:
-			c += 1
-	return c
+	return GameData.count_in_container(container, id)
 
 func _open_stack_popup(id: String, from: String, to: String, available_total: int, removed_one: bool) -> void:
 	_stack_pending.id = id
