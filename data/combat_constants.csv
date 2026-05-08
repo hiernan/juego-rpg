@@ -1,0 +1,2 @@
+id,k,spread_s,p_block,mult_block,p_graze,mult_graze,p_crit,mult_crit,dmg_cap_factor,K_DR,atk0,atk_lv,def0,def_lv,mP,mS,wpn_scale,no_weapon_mult,improv_scale,dSTR,dINT,t_hit_player,t_hit_trash,t_hit_elite,t_hit_boss,escape_p0,escape_sigma,escape_cd,boss_pressure_coef,boss_escape_lock
+global,1.0,0.10,0.10,0.50,0.15,0.70,0.10,1.80,2.5,50,10,3,8,2.5,0.80,0.30,1.0,0.60,0.10,20,20,1.6,2.0,1.8,2.2,0.70,0.06,8,0.05,1

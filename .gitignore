@@ -5,3 +5,6 @@ export_presets.cfg
 *.tmp
 *.log
 *.db
+.~lock.*#
+*.bak
+*.backup

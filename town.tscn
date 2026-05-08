@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://cyjy70hhwktt5"]
+[gd_scene load_steps=5 format=3 uid="uid://cyjy70hhwktt5"]
 
 [ext_resource type="Script" uid="uid://da0t2gdtu18ol" path="res://scripts/town.gd" id="1_f2a5t"]
 [ext_resource type="Texture2D" uid="uid://bt5lr0yfbnjp5" path="res://Images/FondoSimple1.png" id="2_ms2es"]
+[ext_resource type="Texture2D" uid="uid://droahl2j8nsa4" path="res://Images/Fondo_puerta_taberna.png" id="3_e8yg3"]
+[ext_resource type="Texture2D" uid="uid://ithw3pl7od72" path="res://Images/Fondo_borde_cartel.png" id="4_gwqsq"]
 
 [node name="Town" type="Control"]
 layout_mode = 3
@@ -23,14 +25,6 @@ texture = ExtResource("2_ms2es")
 expand_mode = 3
 stretch_mode = 6
 
-[node name="ButtonTablon" type="Button" parent="."]
-layout_mode = 0
-offset_left = 434.0
-offset_top = 407.0
-offset_right = 592.0
-offset_bottom = 438.0
-text = "Tablon de anuncios"
-
 [node name="ButtonRecargarDatos" type="Button" parent="."]
 layout_mode = 0
 offset_left = 1013.0
@@ -39,5 +33,34 @@ offset_right = 1139.0
 offset_bottom = 636.0
 text = "Recargar Datos"
 
-[connection signal="pressed" from="ButtonTablon" to="." method="_on_button_tablon_pressed"]
+[node name="DoorOpenInn" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(702.035, 427.44)
+scale = Vector2(0.736, 0.736)
+texture = ExtResource("3_e8yg3")
+
+[node name="HotspotDoorInn" type="Button" parent="."]
+layout_mode = 0
+offset_left = 669.07
+offset_top = 352.54
+offset_right = 738.075
+offset_bottom = 500.555
+focus_mode = 0
+flat = true
+
+[node name="BoardGlow" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(504, 450.99997)
+scale = Vector2(0.745, 0.745)
+texture = ExtResource("4_gwqsq")
+
+[node name="HotspotBoard" type="Button" parent="."]
+layout_mode = 0
+offset_left = 415.0
+offset_top = 332.0
+offset_right = 598.335
+offset_bottom = 509.185
+focus_mode = 0
+flat = true
+
 [connection signal="pressed" from="ButtonRecargarDatos" to="." method="_on_button_recargar_datos_pressed"]

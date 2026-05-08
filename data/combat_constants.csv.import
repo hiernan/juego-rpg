@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://cex1xtqxbloc6"
+
+[deps]
+
+files=["res://data/combat_constants.k.translation", "res://data/combat_constants.spread.translation", "res://data/combat_constants.p.translation", "res://data/combat_constants.mult.translation", "res://data/combat_constants.p.translation", "res://data/combat_constants.mult.translation", "res://data/combat_constants.p.translation", "res://data/combat_constants.mult.translation", "res://data/combat_constants.dmg.translation", "res://data/combat_constants.K_DR.translation", "res://data/combat_constants.atk0.translation", "res://data/combat_constants.atk.translation", "res://data/combat_constants.def0.translation", "res://data/combat_constants.def.translation", "res://data/combat_constants.mP.translation", "res://data/combat_constants.mS.translation", "res://data/combat_constants.wpn.translation", "res://data/combat_constants.nb.translation", "res://data/combat_constants.improv.translation", "res://data/combat_constants.dSTR.translation", "res://data/combat_constants.dINT.translation", "res://data/combat_constants.t.translation", "res://data/combat_constants.t.translation", "res://data/combat_constants.t.translation", "res://data/combat_constants.t.translation", "res://data/combat_constants.escape.translation", "res://data/combat_constants.escape.translation", "res://data/combat_constants.escape.translation", "res://data/combat_constants.boss.translation", "res://data/combat_constants.boss.translation"]
+
+source_file="res://data/combat_constants.csv"
+dest_files=["res://data/combat_constants.k.translation", "res://data/combat_constants.spread.translation", "res://data/combat_constants.p.translation", "res://data/combat_constants.mult.translation", "res://data/combat_constants.p.translation", "res://data/combat_constants.mult.translation", "res://data/combat_constants.p.translation", "res://data/combat_constants.mult.translation", "res://data/combat_constants.dmg.translation", "res://data/combat_constants.K_DR.translation", "res://data/combat_constants.atk0.translation", "res://data/combat_constants.atk.translation", "res://data/combat_constants.def0.translation", "res://data/combat_constants.def.translation", "res://data/combat_constants.mP.translation", "res://data/combat_constants.mS.translation", "res://data/combat_constants.wpn.translation", "res://data/combat_constants.nb.translation", "res://data/combat_constants.improv.translation", "res://data/combat_constants.dSTR.translation", "res://data/combat_constants.dINT.translation", "res://data/combat_constants.t.translation", "res://data/combat_constants.t.translation", "res://data/combat_constants.t.translation", "res://data/combat_constants.t.translation", "res://data/combat_constants.escape.translation", "res://data/combat_constants.escape.translation", "res://data/combat_constants.escape.translation", "res://data/combat_constants.boss.translation", "res://data/combat_constants.boss.translation"]
+
+[params]
+
+compress=true
+delimiter=0

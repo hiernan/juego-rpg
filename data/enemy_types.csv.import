@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://bwb0m1kdk848l"
+
+[deps]
+
+files=["res://data/enemy_types.m.translation", "res://data/enemy_types.HTK.translation", "res://data/enemy_types.HTK.translation", "res://data/enemy_types.mE.translation", "res://data/enemy_types.HTK.translation", "res://data/enemy_types.HTK.translation", "res://data/enemy_types.boss.translation"]
+
+source_file="res://data/enemy_types.csv"
+dest_files=["res://data/enemy_types.m.translation", "res://data/enemy_types.HTK.translation", "res://data/enemy_types.HTK.translation", "res://data/enemy_types.mE.translation", "res://data/enemy_types.HTK.translation", "res://data/enemy_types.HTK.translation", "res://data/enemy_types.boss.translation"]
+
+[params]
+
+compress=true
+delimiter=0

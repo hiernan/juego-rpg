@@ -1,0 +1,4 @@
+tier,heal_pct,weight,tier_mult,GCD_base,rho_sickness,cap_pct,P0,price_chapter_coef,HP_ref,price_eta,stock_ch1,stock_ch2,stock_ch3
+S,0.18,1,1.0,30,0.12,0.60,30,1.22,300,0.60,999,999,999
+M,0.30,2,2.2,30,0.12,0.60,30,1.22,300,0.60,6,8,10
+L,0.45,3,4.0,30,0.12,0.60,30,1.22,300,0.60,3,4,6

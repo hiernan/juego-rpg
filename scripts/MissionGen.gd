@@ -72,11 +72,6 @@ static func build_sequence(location_id: String, length_tag: String = "short") ->
 
 		print("[MissionGen] step:", steps, " choice:", choice, " +", cost, "s → elapsed:", elapsed, "/", max_time)
 
-		# Pequeña chance de cortar antes
-		if randf() < 0.05:
-			print("[MissionGen] corte temprano por RNG")
-			break
-
 	# Cierre
 	seq.append({"type": "end"})
 	print("[MissionGen] FIN: steps=", steps, " elapsed=", elapsed, "/", max_time, " eventos_total=", seq.size())

@@ -6,10 +6,10 @@ uid="uid://deymsa7ypfdro"
 
 [deps]
 
-files=["res://data/weapons.name.translation", "res://data/weapons.dmg.translation", "res://data/weapons.dmg.translation", "res://data/weapons.price.translation"]
+files=["res://data/weapons.name.translation", "res://data/weapons.dmg.translation", "res://data/weapons.dmg.translation", "res://data/weapons.price.translation", "res://data/weapons.kind.translation"]
 
 source_file="res://data/weapons.csv"
-dest_files=["res://data/weapons.name.translation", "res://data/weapons.dmg.translation", "res://data/weapons.dmg.translation", "res://data/weapons.price.translation"]
+dest_files=["res://data/weapons.name.translation", "res://data/weapons.dmg.translation", "res://data/weapons.dmg.translation", "res://data/weapons.price.translation", "res://data/weapons.kind.translation"]
 
 [params]
 

@@ -1,0 +1,4 @@
+chapter,LV_ref_ch,hp_coef_base,atk_coef_base,def_coef_base,lv_coef_base
+1,5,1.20,1.16,1.16,1.04
+2,12,1.20,1.16,1.16,1.04
+3,20,1.20,1.16,1.16,1.04

@@ -1,5 +1,10 @@
 extends Control
 
+var mission_time_scale: float = 2.0	# 1.0 normal, 2.0 el doble, 0.5 más lento
+var auto_potion_threshold: float = 0.25	# 25%
+var auto_potion_item_id: String = "potion_small"
+var _auto_potion_suppressed_until_safe: bool = false
+	
 const MissionGen = preload("res://scripts/MissionGen.gd")
 const Combat = preload("res://scripts/Combat.gd")
 
@@ -34,6 +39,7 @@ var line_queue: Array = []     # cola de renglones a imprimir
 var next_delay: float = 1.5            # delay entre líneas (lo maneja TimerTick)
 var dots_plan: Dictionary = {}	# guarda {min,max,ev} para iniciar puntos en el próximo tick
 var dots_remaining: int = 0
+var _result_bag: Array = []
 
 # Cola de líneas/efectos ya la tenés como line_queue (usamos Variant)
 var effect_queue: Array = []	# por si preferís separar (no obligatorio)
@@ -63,7 +69,14 @@ func _enqueue_lines(lines: Array, delay_sec: float = 0.9) -> void:
 
 
 func _ready() -> void:
+	GameData.loot_bag_reset()
+	print("[LOOT] mission start → loot_bag reset")
+	GameData.transfer_inventory_to_bag()
+	print("[DEBUG] bag at start:", GameData.loot_bag.size(), GameData.loot_bag)
+	print("[LOOT] mission start → inventory moved to bag (size=", GameData.loot_bag.size(), ")")
+	_refresh_loot_ui()
 	label_titulo.text = "Misión en curso"
+	Engine.time_scale = mission_time_scale
 	_build_demo_sequence()     # por ahora una secuencia fake de prueba
 	timer_tick.start()         # arranca el loop de eventos
 	overlay.visible = false
@@ -305,11 +318,15 @@ func _finish_mission() -> void:
 	timer_dots.stop()
 	if bell.stream:
 		bell.play()
+	_result_bag = GameData.loot_bag.duplicate()
+	GameData.loot_bag_to_inventory()
 	_show_result_overlay("¡Victoria!", false)  # lost = false
 
 func _on_button_abandonar_pressed() -> void:
 	timer_tick.stop()
 	timer_dots.stop()
+	_result_bag = GameData.loot_bag.duplicate()
+	GameData.loot_bag_to_inventory()
 	_show_result_overlay("Misión abandonada", false)  # lost = false
 
 func _finish_death() -> void:
@@ -317,6 +334,11 @@ func _finish_death() -> void:
 	timer_dots.stop()
 	if bell.stream:
 		bell.play()
+
+	# Conservar la XP ganada en la misión (aunque se pierda la bolsa/oro)
+	var gained_xp: int = int(run_rewards.get("xp", 0))
+	GameData.avatar["xp"] = int(GameData.avatar.get("xp", 0)) + gained_xp
+
 	_show_result_overlay("Tu avatar murió", true)  # lost = true
 
 func _on_button_volver_pressed() -> void:
@@ -343,6 +365,10 @@ func _reward_add_item(item_id: String) -> void:
 	var arr: Array = run_rewards["items"]
 	arr.append(item_id)
 	run_rewards["items"] = arr
+
+	# Bolsa = inventario activo en misión
+	GameData.loot_bag_add(item_id)
+
 	_refresh_loot_ui()
 
 func _reward_clear() -> void:
@@ -350,20 +376,30 @@ func _reward_clear() -> void:
 	_refresh_loot_ui()
 
 func _refresh_loot_ui() -> void:
-	if loot_log == null: return
+	if loot_log == null:
+		return
 	var lines: Array = []
 	lines.append("[b]Oro:[/b] %d" % int(run_rewards["gold"]))
 	lines.append("[b]XP:[/b] %d" % int(run_rewards["xp"]))
-	lines.append("[b]Objetos:[/b]")
-	for id in run_rewards["items"]:
-		var name: String = String(id)
-		if GameData.weapons.has(id):
-			name = String(GameData.weapons[id].get("name", id))
-		elif GameData.armors.has(id):
-			name = String(GameData.armors[id].get("name", id))
-		elif id == "potion_small":
-			name = "Poción menor de curación"
-		lines.append(" • " + name)
+	lines.append("[b]Bolsa:[/b]")
+
+	# Contar por id dentro de la Bolsa
+	var counts: Dictionary = {}
+	for x in GameData.loot_bag:
+		var iid: String = String(x)
+		counts[iid] = int(counts.get(iid, 0)) + 1
+
+	# Mostrar "Nombre (xN)" usando el helper central si existe
+	for iid in counts.keys():
+		var name: String = ""
+		if GameData.has_method("get_item_display_name"):
+			name = GameData.get_item_display_name(iid)
+		else:
+			name = iid
+		var n: int = int(counts[iid])
+		var label: String = name if n <= 1 else "%s (x%d)" % [name, n]
+		lines.append(" • " + label)
+
 	loot_log.clear()
 	loot_log.append_text(_join_lines(lines))
 
@@ -379,19 +415,24 @@ func _compose_summary_text(lost: bool) -> String:
 		sb.append("Botín obtenido:")
 		sb.append(" • Oro: %d" % int(run_rewards["gold"]))
 		sb.append(" • XP: %d" % int(run_rewards["xp"]))
-		if (run_rewards["items"] as Array).is_empty():
+		# Mostrar TODA la bolsa del run (snapshot), agrupada. Fallback: run_rewards["items"]
+		var bag: Array = _result_bag if _result_bag.size() > 0 else Array(run_rewards.get("items", []))
+
+		# Contar por id
+		var counts := {}
+		for x in bag:
+			var iid: String = String(x)
+			counts[iid] = int(counts.get(iid, 0)) + 1
+
+		if counts.size() == 0:
 			sb.append(" • Objetos: (ninguno)")
 		else:
 			sb.append(" • Objetos:")
-			for id in run_rewards["items"]:
-				var name: String = String(id)
-				if GameData.weapons.has(id):
-					name = String(GameData.weapons[id].get("name", id))
-				elif GameData.armors.has(id):
-					name = String(GameData.armors[id].get("name", id))
-				elif id == "potion_small":
-					name = "Poción menor de curación"
-				sb.append("    - " + name)
+			for iid in counts.keys():
+				var nice := GameData.get_item_display_name(iid)
+				var n: int = int(counts[iid])
+				var line := "    - %s" % nice if n <= 1 else "    - %s (x%d)" % [nice, n]
+				sb.append(line)
 	return _join_lines(sb)
 
 func _show_result_overlay(title: String, lost: bool) -> void:
@@ -531,17 +572,11 @@ func _combat_round() -> void:
 	else:
 		_enqueue_lines([_fmt_gm("El %s ataca, pero falla." % enemy_name)], 0.8)
 
-
-	# Autopoción si corresponde (tras recibir daño)
-	_auto_potion_if_needed()
-
 	# Muerte del avatar
 	if GameData.is_dead():
 		_enqueue_lines([_fmt_gm("Tus fuerzas te abandonan…")], 1.2)
 		call_deferred("_finish_death")
 		return
-	# si ya estás bajo de vida aunque el enemigo falló, intentá poción ahora
-	_auto_potion_if_needed()
 
 	# --- 2) Avatar ataca ---
 	if not Combat.roll_hit(Combat.get_avatar_level(), e_lvl, 0.0, 0.0):
@@ -584,3 +619,68 @@ func _combat_round() -> void:
 
 	# Si sigue vivo, encolar otra ronda
 	line_queue.append({"apply": {"type": "combat_next"}})
+
+func _exit_tree() -> void:
+	Engine.time_scale = 1.0
+
+func apply_avatar_damage(amount: int) -> void:
+	# Resta HP y dispara el chequeo de auto-poción
+	if amount <= 0:
+		return
+	var av = GameData.avatar
+	var hp_max := int(av.get("hp_max", av.get("max_hp", 0)))
+	var hp_cur := int(av.get("hp", 0))
+	var new_hp: int = int(max(hp_cur - amount, 0))
+	GameData.avatar["hp"] = new_hp
+	print("[DMG] -%d HP (%d → %d / %d)" % [amount, hp_cur, new_hp, hp_max])
+	_auto_potion_after_damage(hp_max, new_hp)
+
+func _auto_potion_after_damage(hp_max: int, hp_cur: int) -> void:
+	if hp_max <= 0:
+		return
+	var thresh := int(ceil(float(hp_max) * auto_potion_threshold))
+	var in_danger := hp_cur <= thresh
+
+	# salí del peligro → reseteo anti-spam
+	if not in_danger and _auto_potion_suppressed_until_safe:
+		_auto_potion_suppressed_until_safe = false
+		return
+	if not in_danger:
+		return
+
+	# intentar usar 1 poción desde la BOLSA
+	if GameData.bag_has(auto_potion_item_id, 1):
+		if GameData.bag_consume(auto_potion_item_id, 1):
+			var healed: int = GameData.apply_potion_effect(auto_potion_item_id)
+			print("[POTION] Auto-uso: +%d HP (restantes=%d)" % [
+				healed, GameData.bag_count(auto_potion_item_id)
+			])
+			return
+
+	# no hay pociones → decirlo una sola vez hasta salir de peligro
+	if not _auto_potion_suppressed_until_safe:
+		_auto_potion_suppressed_until_safe = true
+		print("[AVATAR] ¡Arghhh, me quedé sin pociones!")
+
+func _compose_items_block() -> String:
+	# Usa la bolsa del run (_result_bag). Si está vacía, cae a run_rewards["items"].
+	var bag: Array = _result_bag if _result_bag.size() > 0 else Array(run_rewards.get("items", []))
+
+	# Contar por id
+	var counts := {}
+	for x in bag:
+		var iid: String = String(x)
+		counts[iid] = int(counts.get(iid, 0)) + 1
+
+	var lines: Array = []
+	if counts.size() == 0:
+		lines.append("[b]Objetos:[/b] — (ninguno)")
+	else:
+		lines.append("[b]Objetos:[/b]")
+		for iid in counts.keys():
+			var nice := GameData.get_item_display_name(iid)
+			var n: int = int(counts[iid])
+			var label := " • %s" % nice if n <= 1 else " • %s (x%d)" % [nice, n]
+			lines.append(label)
+
+	return _join_lines(lines)  # usa tu helper existente que junta líneas
