@@ -2,7 +2,6 @@ extends Node
 
 const InventoryServiceScript = preload("res://scripts/services/InventoryService.gd")
 const ShopServiceScript = preload("res://scripts/services/ShopService.gd")
-const CsvLoaderScript = preload("res://scripts/data/CsvLoader.gd")
 const DataLoadersScript = preload("res://scripts/data/DataLoaders.gd")
 
 # --- Diccionarios globales (por id) ---
@@ -158,23 +157,6 @@ func load_all() -> void:
 	_load_shop("blacksmith", "res://data/shop_blacksmith.csv")
 	_load_shop("healer",     "res://data/shop_healer.csv")
 	_load_shop("tavern",     "res://data/shop_tavern.csv")
-	print("[SHOP TEST] tavern items -> ", get_shop_items("tavern"))
-	print("[SHOP TEST] tavern price potion_small -> ", get_shop_price("tavern", "potion_small"))
-	print("[SHOP TEST] blacksmith stock long_sword -> ", get_shop_stock("blacksmith", "long_sword"))
-
-# --- Helpers de parsing ---
-static func _to_int(s: String) -> int:
-	return CsvLoaderScript.to_int(s)
-
-static func _to_float(s: String) -> float:
-	return CsvLoaderScript.to_float(s)
-
-static func _to_list(s: String, sep: String = ";") -> Array[String]:
-	return CsvLoaderScript.to_list(s, sep)
-
-# Lee un CSV y devuelve (headers, rows) donde rows es Array de PackedStringArray
-static func _read_csv(path: String) -> Array:
-	return CsvLoaderScript.read_csv(path)
 
 # --- Tiendas / Economía ---
 var shops: Dictionary = {
