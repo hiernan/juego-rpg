@@ -3,6 +3,7 @@ extends Control
 var mission_time_scale: float = 2.0	# 1.0 normal, 2.0 el doble, 0.5 más lento
 const MissionGen = preload("res://scripts/MissionGen.gd")
 const Combat = preload("res://scripts/Combat.gd")
+const MissionStateScript = preload("res://scripts/state/MissionState.gd")
 const MissionRunnerServiceScript = preload("res://scripts/services/MissionRunnerService.gd")
 const MissionRewardServiceScript = preload("res://scripts/services/MissionRewardService.gd")
 const MissionLogFormatterScript = preload("res://scripts/presentation/MissionLogFormatter.gd")
@@ -24,37 +25,13 @@ const MissionLogFormatterScript = preload("res://scripts/presentation/MissionLog
 @onready var overlay_summary: RichTextLabel = %ResultSummary
 
 var run_rewards := MissionRewardServiceScript.empty_rewards()
-
-var events: Array[Dictionary] = []        # cola de eventos de la misión
-var waiting_dots := false
-var line_queue: Array = []     # cola de renglones a imprimir
-var next_delay: float = 1.5            # delay entre líneas (lo maneja TimerTick)
-var dots_plan: Dictionary = {}	# guarda {min,max,ev} para iniciar puntos en el próximo tick
-var dots_remaining: int = 0
-var _result_bag: Array = []
-
-# Enemigo actual (cuando hay combate)
-var current_enemy := {
-	"id": "",
-	"name": "",
-	"hp": 0,
-	"hp_max": 0,
-	"dmg_min": 0,
-	"dmg_max": 0,
-	"gold_min": 0,
-	"gold_max": 0,
-	"xp": 0,
-	"evasion": 0.05,	# default; luego lo podremos leer de CSV
-	"level": 1
-}
+var mission_state := MissionStateScript.new()
 
 func _enqueue_lines(lines: Array, delay_sec: float = 0.9) -> void:
-	for line in lines:
-		line_queue.append(line)
-	next_delay = delay_sec
-	if not waiting_dots and not timer_tick.is_stopped():
+	mission_state.enqueue_lines(lines, delay_sec)
+	if not mission_state.waiting_dots and not timer_tick.is_stopped():
 		timer_tick.stop()
-		timer_tick.start(next_delay)
+		timer_tick.start(mission_state.next_delay)
 
 
 func _ready() -> void:
@@ -90,17 +67,17 @@ func _fmt_avatar(t: String) -> String:
 
 func _build_demo_sequence() -> void:
 	var loc_id: String = GameData.current_location_id
-	events = MissionGen.build_sequence(loc_id, "short")
-	print("[Mission] eventos recibidos:", events.size())
+	mission_state.set_events(MissionGen.build_sequence(loc_id, "short"))
+	print("[Mission] eventos recibidos:", mission_state.events.size())
 
 # ---------- Loop de misión ----------
 func _on_timer_tick_timeout() -> void:
-	if waiting_dots:
+	if mission_state.waiting_dots:
 		return
 
 	# 1) Si hay líneas pendientes, imprimimos una y rearmamos el timer
-	if not line_queue.is_empty():
-		var node = line_queue.pop_front()
+	if mission_state.has_pending_lines():
+		var node = mission_state.pop_line()
 
 		# 1) Si es un marcador de efecto, aplicarlo y programar próximo tick corto
 		if typeof(node) == TYPE_DICTIONARY and (node as Dictionary).has("apply"):
@@ -113,31 +90,31 @@ func _on_timer_tick_timeout() -> void:
 			var line: String = (node as String)
 
 			# marcador: no imprimir, arrancar puntos
-			if line == "[DO_SEARCH_DOTS]":
+			if line == MissionStateScript.SEARCH_DOTS_MARKER:
 				_start_search_dots()
 				timer_tick.start(0.1)
 				return
 
 			# inline o normal
-			if line.begins_with("[INLINE]"):
+			if line.begins_with(MissionStateScript.INLINE_PREFIX):
 				_append_inline(line.substr(8))
 			else:
 				_append_line(line)
 
-			timer_tick.start(next_delay)
+			timer_tick.start(mission_state.next_delay)
 			return
 
 		# 3) fallback por si llega otro tipo
 		_append_line(String(node))
-		timer_tick.start(next_delay)
+		timer_tick.start(mission_state.next_delay)
 		return
 
 	# 2) Si no hay líneas, consumimos un evento de la misión
-	if events.is_empty():
+	if not mission_state.has_pending_events():
 		_finish_mission()
 		return
 
-	var ev: Dictionary = events.pop_front() as Dictionary
+	var ev: Dictionary = mission_state.pop_event()
 	match ev.get("type", ""):
 		"room_flavor":
 			# Encolamos una sola línea del GM con pausa suave
@@ -147,12 +124,8 @@ func _on_timer_tick_timeout() -> void:
 			# 1) descripción del GM
 			_enqueue_lines([_fmt_gm(desc)], 0.8)
 			# 2) línea del Avatar con INLINE para que los puntos vayan en la misma línea
-			line_queue.append("[INLINE]" + _fmt_avatar("reviso a ver si hay algo interesante "))
-			# 3) preparar plan de puntos con el evento (ev) dentro
-			dots_plan = {"min": 5, "max": 10, "ev": ev}
-			# 4) marcador que activa los puntos (no se imprime)
-			line_queue.append("[DO_SEARCH_DOTS]")
-			next_delay = 0.6
+			mission_state.prepare_search_room(ev, _fmt_avatar("reviso a ver si hay algo interesante "))
+			mission_state.next_delay = 0.6
 			return
 		"enemy":
 			_resolve_enemy_as_lines(ev)
@@ -183,14 +156,7 @@ func _on_timer_tick_timeout() -> void:
 			_enqueue_lines([_fmt_gm("Nada relevante ocurre…")], 1.0)
 
 func _start_search_dots() -> void:
-	# activar estado de puntos
-	waiting_dots = true
-
-	# setear cantidad
-	var min := int(dots_plan.get("min", 5))
-	var max := int(dots_plan.get("max", 10))
-	dots_remaining = randi_range(min, max)
-
+	mission_state.start_search_dots()
 	# arrancar timer de puntos
 	timer_dots.start(0.5)
 
@@ -198,17 +164,13 @@ func _start_search_dots() -> void:
 	# (el _on_timer_tick_timeout() ya retorna si waiting_dots = true)
 
 func _on_timer_dots_timeout() -> void:
-	if dots_remaining > 0:
+	if mission_state.consume_search_dot():
 		_append_inline(".")
-		dots_remaining -= 1
 		return
 
 	# Terminar puntos y resolver búsqueda
 	timer_dots.stop()
-	# romper la línea inline antes del resultado
-	line_queue.append("[INLINE]\n")
-	
-	var ev: Dictionary = dots_plan.get("ev", {})
+	var ev: Dictionary = mission_state.finish_search_dots()
 	var resolution: Dictionary = MissionRunnerServiceScript.resolve_search_room(GameData, ev)
 	var result_lines: Array = []
 	for line in (resolution.get("lines", []) as Array):
@@ -222,8 +184,6 @@ func _on_timer_dots_timeout() -> void:
 		_enqueue_apply_reward(reward_gold, reward_xp, reward_items)
 
 	_enqueue_lines(result_lines, 1.0)
-		# reanudar el loop
-	waiting_dots = false
 	timer_tick.start(0.2)
 
 func _append_inline(t: String) -> void:
@@ -237,15 +197,15 @@ func _scroll_to_bottom() -> void:
 func _resolve_enemy_as_lines(ev: Dictionary) -> void:
 	# 1) Cargar definición
 	var enemy_id: String = String(ev.get("id", "goblin"))
-	current_enemy = MissionRunnerServiceScript.build_enemy_instance(GameData, enemy_id)
+	mission_state.set_current_enemy(MissionRunnerServiceScript.build_enemy_instance(GameData, enemy_id))
 
-	var enemy_name: String = String(current_enemy["name"])
+	var enemy_name: String = String(mission_state.current_enemy["name"])
 
 	# 2) Presentación
 	_enqueue_lines([_fmt_gm("Un %s aparece de golpe." % enemy_name)], 0.8)
 
 	# --- ARRANCAR RONDAS DE COMBATE ---
-	line_queue.append({"apply": {"type": "combat_next"}})
+	mission_state.enqueue_node({"apply": {"type": "combat_next"}})
 	return
 
 # ---------- Finalización / abandono ----------
@@ -254,14 +214,14 @@ func _finish_mission() -> void:
 	timer_dots.stop()
 	if bell.stream:
 		bell.play()
-	_result_bag = GameData.loot_bag.duplicate()
+	mission_state.set_result_bag(GameData.loot_bag)
 	GameData.loot_bag_to_inventory()
 	_show_result_overlay("¡Victoria!", false)  # lost = false
 
 func _on_button_abandonar_pressed() -> void:
 	timer_tick.stop()
 	timer_dots.stop()
-	_result_bag = GameData.loot_bag.duplicate()
+	mission_state.set_result_bag(GameData.loot_bag)
 	GameData.loot_bag_to_inventory()
 	_show_result_overlay("Misión abandonada", false)  # lost = false
 
@@ -322,7 +282,7 @@ func _show_result_overlay(title: String, lost: bool) -> void:
 		overlay_title.text = title
 		overlay_summary.clear()
 		overlay_summary.append_text(
-			MissionLogFormatterScript.format_result_summary(GameData, run_rewards, _result_bag, lost)
+			MissionLogFormatterScript.format_result_summary(GameData, run_rewards, mission_state.result_bag, lost)
 		)
 		overlay.visible = true
 
@@ -330,10 +290,10 @@ func _apply_rewards_to_avatar() -> void:
 	MissionRewardServiceScript.apply_to_avatar(GameData, run_rewards)
 # Encolá un efecto para aplicar tras mostrar su línea asociada
 func _enqueue_apply_reward(gold: int, xp: int, items: Array) -> void:
-	line_queue.append({"apply": {"type": "reward", "gold": gold, "xp": xp, "items": items}})
+	mission_state.enqueue_node({"apply": {"type": "reward", "gold": gold, "xp": xp, "items": items}})
 
 func _enqueue_consume_item(item_id: String, heal: int) -> void:
-	line_queue.append({"apply": {"type": "consume", "item_id": item_id, "heal": heal}})
+	mission_state.enqueue_node({"apply": {"type": "consume", "item_id": item_id, "heal": heal}})
 
 func _apply_marker(d: Dictionary) -> void:
 	var ap: Dictionary = d.get("apply", {})
@@ -357,18 +317,18 @@ func _apply_marker(d: Dictionary) -> void:
 
 func _combat_round() -> void:
 	# Seguridad: si no hay enemigo activo, no hacer nada
-	if String(current_enemy.get("id", "")) == "":
+	if String(mission_state.current_enemy.get("id", "")) == "":
 		return
 
-	var enemy_name: String = String(current_enemy["name"])
+	var enemy_name: String = String(mission_state.current_enemy["name"])
 
 	# --- 1) Enemigo ataca ---
-	var e_lvl := int(current_enemy["level"])
+	var e_lvl := int(mission_state.current_enemy["level"])
 	var a_lvl := Combat.get_avatar_level()
 
 	if Combat.roll_hit(e_lvl, a_lvl, 0.0, 0.0):
 		# Daño con ATK/DEF + flags (block/graze/crit)
-		var res_e := Combat.compute_enemy_hit_detail(current_enemy, GameData.get_avatar_state())
+		var res_e := Combat.compute_enemy_hit_detail(mission_state.current_enemy, GameData.get_avatar_state())
 		var dmg_e: int = int(res_e["dmg"])
 		var flags_e: Dictionary = res_e["flags"]
 
@@ -392,7 +352,7 @@ func _combat_round() -> void:
 		# 2) Si te mató, mostramos despedida y cerramos vía marcador (respeta orden)
 		if GameData.is_dead():
 			_enqueue_lines([_fmt_gm("Tus fuerzas te abandonan…")], 1.0)
-			line_queue.append({"apply": {"type": "finish_death"}})
+			mission_state.enqueue_node({"apply": {"type": "finish_death"}})
 			return
 
 		# 3) Si seguís vivo, recién ahí va la queja del Avatar
@@ -411,18 +371,18 @@ func _combat_round() -> void:
 	if not Combat.roll_hit(Combat.get_avatar_level(), e_lvl, 0.0, 0.0):
 		_enqueue_lines([_fmt_gm("Atacás… fallás.")], 0.8)
 		# Encolar próxima ronda
-		line_queue.append({"apply": {"type": "combat_next"}})
+		mission_state.enqueue_node({"apply": {"type": "combat_next"}})
 		return
 
 	# Evasión del enemigo
-	if Combat.roll_dodge(float(current_enemy["evasion"])):
+	if Combat.roll_dodge(float(mission_state.current_enemy["evasion"])):
 		_enqueue_lines([_fmt_gm("Atacás… ¡pero el %s esquiva!" % enemy_name)], 0.9)
 		# Encolar próxima ronda
-		line_queue.append({"apply": {"type": "combat_next"}})
+		mission_state.enqueue_node({"apply": {"type": "combat_next"}})
 		return
 
 	# Daño con ATK/DEF + flags (block/graze/crit)
-	var res_you := Combat.compute_avatar_hit_detail(GameData.get_avatar_state(), current_enemy, "MELEE")
+	var res_you := Combat.compute_avatar_hit_detail(GameData.get_avatar_state(), mission_state.current_enemy, "MELEE")
 	var dmg_you: int = int(res_you["dmg"])
 	var flags_you: Dictionary = res_you["flags"]
 
@@ -438,12 +398,12 @@ func _combat_round() -> void:
 		attack_line = _fmt_gm("Atacás con tu arma (%d)." % [dmg_you])
 
 	# aplicar daño al enemigo
-	current_enemy["hp"] = max(0, int(current_enemy["hp"]) - dmg_you)
+	mission_state.current_enemy["hp"] = max(0, int(mission_state.current_enemy["hp"]) - dmg_you)
 	_enqueue_lines([attack_line], 0.9)
 
 	# ¿Murió?
-	if int(current_enemy["hp"]) <= 0:
-		var defeat_result: Dictionary = MissionRunnerServiceScript.resolve_enemy_defeat(current_enemy)
+	if int(mission_state.current_enemy["hp"]) <= 0:
+		var defeat_result: Dictionary = MissionRunnerServiceScript.resolve_enemy_defeat(mission_state.current_enemy)
 		var defeat_lines: Array = []
 		for line in (defeat_result.get("lines", []) as Array):
 			defeat_lines.append(_fmt_gm(String(line)))
@@ -455,11 +415,11 @@ func _combat_round() -> void:
 			(defeat_rewards.get("items", []) as Array).duplicate()
 		)
 		# Limpieza del enemigo actual
-		current_enemy["id"] = ""
+		mission_state.clear_current_enemy()
 		return
 
 	# Si sigue vivo, encolar otra ronda
-	line_queue.append({"apply": {"type": "combat_next"}})
+	mission_state.enqueue_node({"apply": {"type": "combat_next"}})
 
 func _exit_tree() -> void:
 	Engine.time_scale = 1.0
