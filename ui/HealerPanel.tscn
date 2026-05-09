@@ -1,0 +1,106 @@
+[gd_scene load_steps=4 format=3 uid="uid://b5x8yhcb2ug71"]
+
+[ext_resource type="Script" uid="uid://4sj6jmpkvg2l" path="res://scripts/TavernShopList.gd" id="1_188jc"]
+[ext_resource type="Script" uid="uid://brrew3wj8ckc1" path="res://scripts/TavernInvList.gd" id="2_3pywd"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_x11yf"]
+
+[node name="HealerContainer" type="PanelContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 48.0
+offset_top = 41.0
+offset_right = -354.0
+offset_bottom = -109.25903
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_x11yf")
+
+[node name="HealerVBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="HealerHBox" type="HSplitContainer" parent="HealerVBox"]
+layout_mode = 2
+split_offset = 369
+dragging_enabled = false
+
+[node name="HealerShopPanel" type="Panel" parent="HealerVBox/HealerHBox"]
+layout_mode = 2
+
+[node name="HealerShopVBox" type="VBoxContainer" parent="HealerVBox/HealerHBox/HealerShopPanel"]
+layout_mode = 0
+offset_left = 17.200003
+offset_top = 10.345001
+offset_right = 367.2
+offset_bottom = 460.345
+
+[node name="HealerShopTitle" type="Label" parent="HealerVBox/HealerHBox/HealerShopPanel/HealerShopVBox"]
+layout_mode = 2
+text = "Boticario"
+horizontal_alignment = 1
+
+[node name="HealerShopList" type="ItemList" parent="HealerVBox/HealerHBox/HealerShopPanel/HealerShopVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+allow_reselect = true
+same_column_width = true
+script = ExtResource("1_188jc")
+
+[node name="HealerInvPanel" type="Panel" parent="HealerVBox/HealerHBox"]
+layout_mode = 2
+
+[node name="HealerInvVBox" type="VBoxContainer" parent="HealerVBox/HealerHBox/HealerInvPanel"]
+layout_mode = 0
+offset_left = 3.2000122
+offset_top = 10.345001
+offset_right = 353.2
+offset_bottom = 460.345
+
+[node name="HealerInvTitle" type="Label" parent="HealerVBox/HealerHBox/HealerInvPanel/HealerInvVBox"]
+layout_mode = 2
+text = "Inventario"
+horizontal_alignment = 1
+
+[node name="HealerInvList" type="ItemList" parent="HealerVBox/HealerHBox/HealerInvPanel/HealerInvVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+allow_reselect = true
+script = ExtResource("2_3pywd")
+
+[node name="TopBar" type="HBoxContainer" parent="HealerVBox"]
+layout_mode = 2
+size_flags_vertical = 10
+
+[node name="Control" type="Control" parent="HealerVBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.59
+
+[node name="GoldLabel" type="Label" parent="HealerVBox/TopBar"]
+layout_mode = 2
+text = "Oro: "
+horizontal_alignment = 1
+
+[node name="TopSpacer" type="Control" parent="HealerVBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BtnCurar" type="Button" parent="HealerVBox/TopBar"]
+layout_mode = 2
+text = "Curar"
+
+[node name="TopSpacer2" type="Control" parent="HealerVBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BtnCerrar" type="Button" parent="HealerVBox/TopBar"]
+layout_mode = 2
+text = "Cerrar"
+
+[node name="Control2" type="Control" parent="HealerVBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.59

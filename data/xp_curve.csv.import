@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://dfj67encbe1it"
+
+[deps]
+
+files=["res://data/xp_curve.a.translation", "res://data/xp_curve.b.translation", "res://data/xp_curve.c.translation", "res://data/xp_curve.r.translation", "res://data/xp_curve.base.translation", "res://data/xp_curve.chapter.translation", "res://data/xp_curve.diff.translation", "res://data/xp_curve.diff.translation", "res://data/xp_curve.diff.translation", "res://data/xp_curve.diff.translation", "res://data/xp_curve.underdog.translation", "res://data/xp_curve.overlevel.translation", "res://data/xp_curve.underdog.translation", "res://data/xp_curve.overlevel.translation"]
+
+source_file="res://data/xp_curve.csv"
+dest_files=["res://data/xp_curve.a.translation", "res://data/xp_curve.b.translation", "res://data/xp_curve.c.translation", "res://data/xp_curve.r.translation", "res://data/xp_curve.base.translation", "res://data/xp_curve.chapter.translation", "res://data/xp_curve.diff.translation", "res://data/xp_curve.diff.translation", "res://data/xp_curve.diff.translation", "res://data/xp_curve.diff.translation", "res://data/xp_curve.underdog.translation", "res://data/xp_curve.overlevel.translation", "res://data/xp_curve.underdog.translation", "res://data/xp_curve.overlevel.translation"]
+
+[params]
+
+compress=true
+delimiter=0

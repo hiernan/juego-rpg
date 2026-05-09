@@ -1,0 +1,2 @@
+id,a,b,c,r,base_xp_min,chapter_coef_base,diff_easy,diff_normal,diff_hard,diff_epic,underdog_alpha,overlevel_beta,underdog_cap,overlevel_cap
+default,30,1.6,20,1.18,50,1.15,0.85,1.00,1.25,1.80,0.05,0.04,0.40,0.50

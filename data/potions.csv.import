@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://2roojom7eg6e"
+
+[deps]
+
+files=["res://data/potions.heal.translation", "res://data/potions.weight.translation", "res://data/potions.tier.translation", "res://data/potions.GCD.translation", "res://data/potions.rho.translation", "res://data/potions.cap.translation", "res://data/potions.P0.translation", "res://data/potions.price.translation", "res://data/potions.HP.translation", "res://data/potions.price.translation", "res://data/potions.stock.translation", "res://data/potions.stock.translation", "res://data/potions.stock.translation"]
+
+source_file="res://data/potions.csv"
+dest_files=["res://data/potions.heal.translation", "res://data/potions.weight.translation", "res://data/potions.tier.translation", "res://data/potions.GCD.translation", "res://data/potions.rho.translation", "res://data/potions.cap.translation", "res://data/potions.P0.translation", "res://data/potions.price.translation", "res://data/potions.HP.translation", "res://data/potions.price.translation", "res://data/potions.stock.translation", "res://data/potions.stock.translation", "res://data/potions.stock.translation"]
+
+[params]
+
+compress=true
+delimiter=0

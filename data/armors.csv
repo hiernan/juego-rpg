@@ -1,7 +1,7 @@
-id,name,armor,price
-cloth,Túnica de tela,0,5
-leather_armor,Armadura de cuero,1,15
-chain_mail,Cota de malla,2,40
-scale,Armadura de escamas,3,70
-plate,Armadura de placas,4,120
-shield,Escudo,1,25
+id,name,armor,price,kind
+cloth,Túnica de tela,0,5,armor
+leather_armor,Armadura de cuero,1,15,armor
+chain_mail,Cota de malla,2,40,armor
+scale,Armadura de escamas,3,70,armor
+plate,Armadura de placas,4,120,armor
+shield,Escudo,1,25,armor

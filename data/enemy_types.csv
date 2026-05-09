@@ -1,0 +1,6 @@
+type,m_obj_player_to_enemy,HTK_P_min,HTK_P_max,mE_obj_enemy_to_player,HTK_E_min,HTK_E_max,boss_lock
+trash,0.75,3,4,0.35,10,14,0
+elite,0.62,6,8,0.45,6,9,0
+boss,0.48,45,60,0.55,5,7,1
+
+

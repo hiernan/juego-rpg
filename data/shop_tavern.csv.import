@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://bld7q3l1frcre"
+
+[deps]
+
+files=["res://data/shop_tavern.stock.translation", "res://data/shop_tavern.price.translation"]
+
+source_file="res://data/shop_tavern.csv"
+dest_files=["res://data/shop_tavern.stock.translation", "res://data/shop_tavern.price.translation"]
+
+[params]
+
+compress=true
+delimiter=0

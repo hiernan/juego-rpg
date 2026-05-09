@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://b2u85fpdl5era"
+
+[deps]
+
+files=["res://data/chapters_missions.LV.translation", "res://data/chapters_missions.hp.translation", "res://data/chapters_missions.atk.translation", "res://data/chapters_missions.def.translation", "res://data/chapters_missions.lv.translation"]
+
+source_file="res://data/chapters_missions.csv"
+dest_files=["res://data/chapters_missions.LV.translation", "res://data/chapters_missions.hp.translation", "res://data/chapters_missions.atk.translation", "res://data/chapters_missions.def.translation", "res://data/chapters_missions.lv.translation"]
+
+[params]
+
+compress=true
+delimiter=0

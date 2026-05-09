@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://b0aphenia4806"
+
+[deps]
+
+files=["res://data/shop_healer.stock.translation", "res://data/shop_healer.price.translation"]
+
+source_file="res://data/shop_healer.csv"
+dest_files=["res://data/shop_healer.stock.translation", "res://data/shop_healer.price.translation"]
+
+[params]
+
+compress=true
+delimiter=0

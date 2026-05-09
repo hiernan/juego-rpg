@@ -6,7 +6,6 @@ extends Node
 
 class_name MissionEvents
 
-
 # 🪙 Depósito / búsqueda
 static func event_deposito(loc: Dictionary) -> Array[Dictionary]:
 	var seq: Array[Dictionary] = []

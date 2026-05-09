@@ -1,6 +1,6 @@
-id,name,effect
-gold_small,Pequeña bolsa de oro,+10 oro
-gold_medium,Bolsa mediana de oro,+25 oro
-potion_small,Poción menor de curación,+5 HP
-potion_medium,Poción de curación,+10 HP
-nothing,Nada,Sin efecto
+id,name,kind,subkind,heal_pct,heal_hp,stackable,max_stack,rarity,price,tooltip_extra
+potion_small,Poción menor,consumable,heal,25,0,true,20,common,10,
+potion_medium,Poción media,consumable,heal,50,0,true,20,uncommon,20,
+potion_great,Poción grande,consumable,heal,100,0,true,20,rare,30,
+lockpick,Ganzúa,consumable,lockpick,0,0,true,99,common,5,Útil para abrir cerraduras simples
+dungeon_key,Llave del calabozo,key,door,0,0,false,1,quest,1000,

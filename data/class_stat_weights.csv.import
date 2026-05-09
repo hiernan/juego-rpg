@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://dqxj2tdeleoxv"
+
+[deps]
+
+files=["res://data/class_stat_weights.P.translation", "res://data/class_stat_weights.P.translation", "res://data/class_stat_weights.P.translation", "res://data/class_stat_weights.w.translation", "res://data/class_stat_weights.w.translation", "res://data/class_stat_weights.w.translation", "res://data/class_stat_weights.pity.translation", "res://data/class_stat_weights.pity.translation"]
+
+source_file="res://data/class_stat_weights.csv"
+dest_files=["res://data/class_stat_weights.P.translation", "res://data/class_stat_weights.P.translation", "res://data/class_stat_weights.P.translation", "res://data/class_stat_weights.w.translation", "res://data/class_stat_weights.w.translation", "res://data/class_stat_weights.w.translation", "res://data/class_stat_weights.pity.translation", "res://data/class_stat_weights.pity.translation"]
+
+[params]
+
+compress=true
+delimiter=0

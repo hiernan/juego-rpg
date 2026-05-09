@@ -1,0 +1,99 @@
+[gd_scene load_steps=4 format=3 uid="uid://ciow2mprt0a6d"]
+
+[ext_resource type="Script" uid="uid://4sj6jmpkvg2l" path="res://scripts/TavernShopList.gd" id="1_23udo"]
+[ext_resource type="Script" uid="uid://brrew3wj8ckc1" path="res://scripts/TavernInvList.gd" id="2_jxjcg"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_x11yf"]
+
+[node name="ShopContainer" type="PanelContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 48.0
+offset_top = 41.0
+offset_right = -354.0
+offset_bottom = -109.25903
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_x11yf")
+
+[node name="ShopVBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="ShopHBox" type="HSplitContainer" parent="ShopVBox"]
+layout_mode = 2
+split_offset = 369
+dragging_enabled = false
+
+[node name="TavernShopPanel" type="Panel" parent="ShopVBox/ShopHBox"]
+layout_mode = 2
+
+[node name="TavernShopVBox" type="VBoxContainer" parent="ShopVBox/ShopHBox/TavernShopPanel"]
+layout_mode = 0
+offset_left = 17.200003
+offset_top = 10.345001
+offset_right = 367.2
+offset_bottom = 460.345
+
+[node name="TavernShopTitle" type="Label" parent="ShopVBox/ShopHBox/TavernShopPanel/TavernShopVBox"]
+layout_mode = 2
+text = "Taberna"
+horizontal_alignment = 1
+
+[node name="TavernShopList" type="ItemList" parent="ShopVBox/ShopHBox/TavernShopPanel/TavernShopVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+allow_reselect = true
+same_column_width = true
+script = ExtResource("1_23udo")
+
+[node name="TavernInvPanel" type="Panel" parent="ShopVBox/ShopHBox"]
+layout_mode = 2
+
+[node name="TavernInvVBox" type="VBoxContainer" parent="ShopVBox/ShopHBox/TavernInvPanel"]
+layout_mode = 0
+offset_left = 3.2000122
+offset_top = 10.345001
+offset_right = 353.2
+offset_bottom = 460.345
+
+[node name="TavernInvTitle" type="Label" parent="ShopVBox/ShopHBox/TavernInvPanel/TavernInvVBox"]
+layout_mode = 2
+text = "Inventario"
+horizontal_alignment = 1
+
+[node name="TavernInvList" type="ItemList" parent="ShopVBox/ShopHBox/TavernInvPanel/TavernInvVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+allow_reselect = true
+script = ExtResource("2_jxjcg")
+
+[node name="TopBar" type="HBoxContainer" parent="ShopVBox"]
+layout_mode = 2
+size_flags_vertical = 10
+
+[node name="Control" type="Control" parent="ShopVBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.59
+
+[node name="GoldLabel" type="Label" parent="ShopVBox/TopBar"]
+layout_mode = 2
+text = "Oro: "
+horizontal_alignment = 1
+
+[node name="TopSpacer" type="Control" parent="ShopVBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.29
+
+[node name="BtnCerrar" type="Button" parent="ShopVBox/TopBar"]
+layout_mode = 2
+text = "Cerrar"
+
+[node name="Control2" type="Control" parent="ShopVBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.59

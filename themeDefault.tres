@@ -1,0 +1,7 @@
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://cmbul5fwp6h5g"]
+
+[ext_resource type="FontFile" uid="uid://c28hxvdy2c2xw" path="res://fonts/MyMedieval.ttf" id="1_vy26o"]
+
+[resource]
+default_font = ExtResource("1_vy26o")
+default_font_size = 18

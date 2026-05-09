@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://dkdtk4kipvni0"
+
+[deps]
+
+files=["res://data/shop_blacksmith.stock.translation", "res://data/shop_blacksmith.price.translation"]
+
+source_file="res://data/shop_blacksmith.csv"
+dest_files=["res://data/shop_blacksmith.stock.translation", "res://data/shop_blacksmith.price.translation"]
+
+[params]
+
+compress=true
+delimiter=0

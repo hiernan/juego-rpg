@@ -1,17 +1,17 @@
-id,name,hp_min,hp_max,dmg_min,dmg_max,gold_min,gold_max,xp
-goblin,Goblin,5,8,1,3,1,4,3
-bandit,Bandido,7,10,2,5,2,6,4
-orc,Orco,12,16,3,6,3,8,6
-skeleton,Esqueleto,8,12,2,4,1,5,4
-wolf,Lobo,6,9,2,4,1,3,3
-slime,Baba viscosa,4,7,1,2,1,2,2
-bat,Murciélago gigante,3,6,1,2,0,2,2
-troll,Trol,18,24,4,8,5,12,10
-necromancer,Nigromante,14,18,3,6,6,10,9
-zombie,Zombi,9,13,2,4,1,5,4
-spider,Araña venenosa,7,11,2,5,2,6,5
-ghost,Fantasma,10,14,3,6,0,0,7
-knight,Guerrero caído,15,20,4,7,4,10,8
-cultist,Cultista,8,12,2,4,3,7,5
-minotaur,Minotauro,20,26,5,9,8,15,12
-dancingbear,Oso Bailarin,25,50,15,60,100,500,50
+id,name,hp_min,hp_max,dmg_min,dmg_max,armor,gold_min,gold_max,xp
+goblin,Goblin,5,8,1,3,0,1,4,3
+bandit,Bandido,7,10,2,5,1,2,6,4
+orc,Orco,12,16,3,6,3,3,8,6
+skeleton,Esqueleto,8,12,2,4,0,1,5,4
+wolf,Lobo,6,9,2,4,0,1,3,3
+slime,Baba viscosa,4,7,1,2,5,1,2,2
+bat,Murciélago gigante,3,6,1,2,0,0,2,2
+troll,Trol,18,24,4,8,3,5,12,10
+necromancer,Nigromante,14,18,3,6,1,6,10,9
+zombie,Zombi,9,13,2,4,0,1,5,4
+spider,Araña venenosa,7,11,2,5,2,2,6,5
+ghost,Fantasma,10,14,3,6,10,0,0,7
+knight,Guerrero caído,15,20,4,7,3,4,10,8
+cultist,Cultista,8,12,2,4,0,3,7,5
+minotaur,Minotauro,20,26,5,9,4,8,15,12
+dancingbear,Oso Bailarin,25,50,15,60,25,100,500,50

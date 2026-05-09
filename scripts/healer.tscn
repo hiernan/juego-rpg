@@ -1,0 +1,72 @@
+[gd_scene load_steps=9 format=3 uid="uid://byhshenes8p6n"]
+
+[ext_resource type="Script" uid="uid://smwshmwkd8qy" path="res://scripts/healer.gd" id="1_g0kfg"]
+[ext_resource type="Theme" uid="uid://cmbul5fwp6h5g" path="res://themeDefault.tres" id="1_he6uv"]
+[ext_resource type="Texture2D" uid="uid://bqv5lhge41w1d" path="res://Images/Fondo_pergamino.png" id="1_suw3h"]
+[ext_resource type="Texture2D" uid="uid://dlltyqupps7jd" path="res://Images/Fondo boticario.png" id="2_usa2u"]
+[ext_resource type="PackedScene" uid="uid://b5x8yhcb2ug71" path="res://ui/HealerPanel.tscn" id="4_usa2u"]
+[ext_resource type="Script" uid="uid://7hxee215mbm0" path="res://scripts/HealerShopList.gd" id="6_gk8bu"]
+[ext_resource type="Script" uid="uid://uty73epmon0x" path="res://scripts/HealerInvList.gd" id="7_1rd43"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_x11yf"]
+
+[node name="Healer" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_he6uv")
+script = ExtResource("1_g0kfg")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_top = -111.615
+offset_right = 1536.0
+offset_bottom = 912.385
+scale = Vector2(0.835, 0.835)
+texture = ExtResource("2_usa2u")
+
+[node name="BgParchment" type="Sprite2D" parent="."]
+position = Vector2(420, 296.33002)
+scale = Vector2(0.59, 0.59)
+texture = ExtResource("1_suw3h")
+
+[node name="HealerContainer" parent="." instance=ExtResource("4_usa2u")]
+layout_mode = 1
+offset_left = 47.0
+offset_top = 49.0
+offset_right = -355.0
+offset_bottom = -101.25903
+theme_override_styles/panel = SubResource("StyleBoxEmpty_x11yf")
+
+[node name="HealerShopList" parent="HealerContainer/HealerVBox/HealerHBox/HealerShopPanel/HealerShopVBox" index="1"]
+script = ExtResource("6_gk8bu")
+
+[node name="HealerInvList" parent="HealerContainer/HealerVBox/HealerHBox/HealerInvPanel/HealerInvVBox" index="1"]
+script = ExtResource("7_1rd43")
+
+[node name="PopupCantidad" type="AcceptDialog" parent="HealerContainer"]
+oversampling_override = 1.0
+title = "Cuantos?"
+initial_position = 1
+size = Vector2i(130, 100)
+
+[node name="LabelCantidad" type="Label" parent="HealerContainer/PopupCantidad"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 122.0
+offset_bottom = 53.0
+
+[node name="SpinCantidad" type="SpinBox" parent="HealerContainer/PopupCantidad"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 122.0
+offset_bottom = 53.0
+min_value = 1.0
+max_value = 99.0
+value = 1.0
+alignment = 1
+
+[editable path="HealerContainer"]

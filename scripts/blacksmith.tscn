@@ -1,0 +1,69 @@
+[gd_scene load_steps=8 format=3 uid="uid://cceiykffoasmd"]
+
+[ext_resource type="Script" uid="uid://0cnt31qnegxb" path="res://scripts/blacksmith.gd" id="1_5uclw"]
+[ext_resource type="Texture2D" uid="uid://b7qygskmxl82h" path="res://Images/Fondo Herrero.png" id="1_i51jc"]
+[ext_resource type="Theme" uid="uid://cmbul5fwp6h5g" path="res://themeDefault.tres" id="1_ji5xa"]
+[ext_resource type="Texture2D" uid="uid://bqv5lhge41w1d" path="res://Images/Fondo_pergamino.png" id="2_djxwd"]
+[ext_resource type="PackedScene" uid="uid://hqb7ii3alpd8" path="res://ui/BlacksmithPanel.tscn" id="3_djxwd"]
+[ext_resource type="Script" uid="uid://dmq6ls3b5be5h" path="res://scripts/BlacksmithShopList.gd" id="5_4f353"]
+[ext_resource type="Script" uid="uid://jyajvurmjri8" path="res://scripts/BlacksmithInvList.gd" id="6_j36ru"]
+
+[node name="Blacksmith" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_ji5xa")
+script = ExtResource("1_5uclw")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = -132.0
+offset_right = 1404.0
+offset_bottom = 1024.0
+scale = Vector2(0.84, 0.84)
+texture = ExtResource("1_i51jc")
+
+[node name="BgParchment" type="Sprite2D" parent="."]
+position = Vector2(740.3, 301.44)
+scale = Vector2(0.55, 0.55)
+texture = ExtResource("2_djxwd")
+
+[node name="BlacksmithContainer" parent="." instance=ExtResource("3_djxwd")]
+layout_mode = 1
+offset_left = 369.0
+offset_top = 53.0
+offset_right = -33.0
+offset_bottom = -97.25903
+
+[node name="BlacksmithShopList" parent="BlacksmithContainer/BlacksmithVBox/BlacksmithHBox/BlacksmithShopPanel/BlacksmithShopVBox" index="1"]
+script = ExtResource("5_4f353")
+
+[node name="BlacksmithInvList" parent="BlacksmithContainer/BlacksmithVBox/BlacksmithHBox/BlacksmithInvPanel/BlacksmithInvVBox" index="1"]
+script = ExtResource("6_j36ru")
+
+[node name="PopupCantidad" type="AcceptDialog" parent="."]
+oversampling_override = 1.0
+title = "Cuantos?"
+initial_position = 1
+size = Vector2i(130, 100)
+
+[node name="LabelCantidad" type="Label" parent="PopupCantidad"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 122.0
+offset_bottom = 51.0
+
+[node name="SpinCantidad" type="SpinBox" parent="PopupCantidad"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 122.0
+offset_bottom = 51.0
+min_value = 1.0
+max_value = 99.0
+value = 1.0
+alignment = 1
+
+[editable path="BlacksmithContainer"]

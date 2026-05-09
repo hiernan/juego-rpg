@@ -1,7 +1,20 @@
-[gd_scene load_steps=3 format=3 uid="uid://ybq5rcuyixoy"]
+[gd_scene load_steps=15 format=3 uid="uid://ybq5rcuyixoy"]
 
 [ext_resource type="Script" uid="uid://b0ihkkap78sc" path="res://inn.gd" id="1_hxmhp"]
+[ext_resource type="Theme" uid="uid://cmbul5fwp6h5g" path="res://themeDefault.tres" id="1_uccha"]
 [ext_resource type="Texture2D" uid="uid://3e8r2mu8g7n0" path="res://Images/Fondo_Taberrna.png" id="1_xqktd"]
+[ext_resource type="Script" uid="uid://4vfj0qp1npig" path="res://ui/InvListDrag.gd" id="3_7tcty"]
+[ext_resource type="Script" uid="uid://b158c6jhhlrog" path="res://ui/SlotWeaponDrop.gd" id="3_orisw"]
+[ext_resource type="Texture2D" uid="uid://btxa2grd8guqc" path="res://Images/arrow.png" id="4_c84lg"]
+[ext_resource type="Script" uid="uid://ipaygms5g74u" path="res://ui/SlotArmorDrop.gd" id="4_icogv"]
+[ext_resource type="Texture2D" uid="uid://5ejfew01m1so" path="res://Images/Inn_border_tavernLady.png" id="4_rfjvt"]
+[ext_resource type="Script" uid="uid://bbb51jo1gef78" path="res://ui/BaulListDrop.gd" id="5_fhykc"]
+[ext_resource type="Texture2D" uid="uid://dbrkefs2jhhn" path="res://Images/GlowArrow.png" id="5_rfjvt"]
+[ext_resource type="Texture2D" uid="uid://cxrej4byblwcy" path="res://Images/Inn_border_chest.png" id="7_881w3"]
+[ext_resource type="Texture2D" uid="uid://bqv5lhge41w1d" path="res://Images/Fondo_pergamino.png" id="11_x11yf"]
+[ext_resource type="PackedScene" uid="uid://ciow2mprt0a6d" path="res://ui/shopPanel.tscn" id="13_x11yf"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_uccha"]
 
 [node name="Inn" type="Control"]
 layout_mode = 3
@@ -10,6 +23,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_uccha")
 script = ExtResource("1_hxmhp")
 
 [node name="Background" type="TextureRect" parent="."]
@@ -25,34 +39,75 @@ texture = ExtResource("1_xqktd")
 expand_mode = 5
 stretch_mode = 4
 
+[node name="GlowLady" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(886, 237)
+scale = Vector2(0.757, 0.757)
+texture = ExtResource("4_rfjvt")
+
+[node name="LadyButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 831.0
+offset_top = 146.0
+offset_right = 961.0
+offset_bottom = 326.0
+
+[node name="GlowChest" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(935.00006, 511)
+scale = Vector2(0.7570621, 0.7570621)
+texture = ExtResource("7_881w3")
+
+[node name="ChestButton" type="TextureButton" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 785.0
+offset_top = 405.0
+offset_right = 1065.0
+offset_bottom = 625.0
+
+[node name="ReturnArrow" type="Sprite2D" parent="."]
+position = Vector2(88.44, 601.88)
+scale = Vector2(0.27, 0.27)
+texture = ExtResource("4_c84lg")
+
+[node name="GlowArrow" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(89.00001, 602.00006)
+scale = Vector2(0.27, 0.27)
+texture = ExtResource("5_rfjvt")
+
+[node name="ArrowButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 52.440002
+offset_top = 570.88
+offset_right = 127.115005
+offset_bottom = 632.765
+flat = true
+
+[node name="BgParchment" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(420, 283.33002)
+scale = Vector2(0.59, 0.59)
+texture = ExtResource("11_x11yf")
+
 [node name="SheetPanel" type="PanelContainer" parent="."]
 unique_name_in_owner = true
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 47.8
+offset_top = 40.655
+offset_right = -354.2
+offset_bottom = -97.34381
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_uccha")
 
 [node name="SheetVBox" type="VBoxContainer" parent="SheetPanel"]
 layout_mode = 2
-
-[node name="TopBar" type="HBoxContainer" parent="SheetPanel/SheetVBox"]
-layout_mode = 2
-
-[node name="TitleLabel" type="Label" parent="SheetPanel/SheetVBox/TopBar"]
-layout_mode = 2
-text = "Hoja de personaje"
-horizontal_alignment = 1
-
-[node name="TopSpacer" type="Control" parent="SheetPanel/SheetVBox/TopBar"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="BtnCerrar" type="Button" parent="SheetPanel/SheetVBox/TopBar"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Cerrar"
 
 [node name="RootSplit" type="HSplitContainer" parent="SheetPanel/SheetVBox"]
 layout_mode = 2
@@ -62,6 +117,8 @@ split_offset = 700
 [node name="LeftSide" type="VSplitContainer" parent="SheetPanel/SheetVBox/RootSplit"]
 layout_mode = 2
 theme_override_constants/separation = 16
+dragging_enabled = false
+dragger_visibility = 1
 
 [node name="InfoPanel" type="PanelContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide"]
 layout_mode = 2
@@ -73,37 +130,50 @@ theme_override_constants/margin_top = 15
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 15
 
-[node name="VBoxContainer" type="VBoxContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer"]
+[node name="StatsVBoxContainer" type="VBoxContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer"]
 layout_mode = 2
+size_flags_horizontal = 0
 
-[node name="LabelName" type="Label" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer/VBoxContainer"]
+[node name="LabelName" type="Label" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer/StatsVBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Nombre:"
 
-[node name="LabelLevel" type="Label" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer/VBoxContainer"]
+[node name="LabelLevel" type="Label" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer/StatsVBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Nivel: "
 
-[node name="LabelHP" type="Label" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer/VBoxContainer"]
+[node name="LabelHP" type="Label" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer/StatsVBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "HP:"
 
-[node name="LabelGold" type="Label" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer/VBoxContainer"]
+[node name="LabelGold" type="Label" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer/StatsVBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Oro:"
 
-[node name="LabelStats" type="Label" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer/VBoxContainer"]
+[node name="LabelStats" type="Label" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer/StatsVBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Stats:"
 
+[node name="StatsVBoxContainer2" type="VBoxContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="LabelAttack" type="Label" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer/StatsVBoxContainer2"]
+layout_mode = 2
+text = "Ataque:"
+
+[node name="LabelDefense" type="Label" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/InfoPanel/MarginContainer/StatsVBoxContainer2"]
+layout_mode = 2
+text = "Defensa:"
+
 [node name="BottomSplit" type="HSplitContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide"]
 layout_mode = 2
-split_offset = 400
+split_offset = 300
 
 [node name="EquipPanel" type="PanelContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/BottomSplit"]
 layout_mode = 2
@@ -125,11 +195,13 @@ columns = 3
 unique_name_in_owner = true
 layout_mode = 2
 text = "Arma"
+script = ExtResource("3_orisw")
 
 [node name="Slot_Armor" type="Button" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/BottomSplit/EquipPanel/MarginContainer/EquipGrid"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Armadura"
+script = ExtResource("4_icogv")
 
 [node name="InvPanel" type="PanelContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/BottomSplit"]
 layout_mode = 2
@@ -155,6 +227,7 @@ layout_mode = 2
 size_flags_vertical = 3
 allow_reselect = true
 same_column_width = true
+script = ExtResource("3_7tcty")
 
 [node name="InvButtons" type="HBoxContainer" parent="SheetPanel/SheetVBox/RootSplit/LeftSide/BottomSplit/InvPanel/MarginContainer/InvVBox"]
 layout_mode = 2
@@ -194,6 +267,7 @@ custom_minimum_size = Vector2(0, 220)
 layout_mode = 2
 size_flags_vertical = 3
 allow_reselect = true
+script = ExtResource("5_fhykc")
 
 [node name="BaulButtons" type="HBoxContainer" parent="SheetPanel/SheetVBox/RootSplit/BaulPanel/MarginContainer/BaulVBox"]
 layout_mode = 2
@@ -204,10 +278,41 @@ layout_mode = 2
 disabled = true
 text = "Retirar al inventario"
 
-[node name="ChestButton" type="TextureButton" parent="."]
+[node name="TopBar" type="HBoxContainer" parent="SheetPanel/SheetVBox"]
+layout_mode = 2
+
+[node name="BtnCerrar" type="Button" parent="SheetPanel/SheetVBox/TopBar"]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 785.0
-offset_top = 405.0
-offset_right = 1065.0
-offset_bottom = 625.0
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
+text = "Cerrar"
+
+[node name="PopupCantidad" type="AcceptDialog" parent="."]
+oversampling_override = 1.0
+title = "Cuantos?"
+initial_position = 1
+size = Vector2i(130, 100)
+
+[node name="LabelCantidad" type="Label" parent="PopupCantidad"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 122.0
+offset_bottom = 53.0
+
+[node name="SpinCantidad" type="SpinBox" parent="PopupCantidad"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 122.0
+offset_bottom = 53.0
+min_value = 1.0
+max_value = 99.0
+value = 1.0
+alignment = 1
+
+[node name="ShopContainer" parent="." instance=ExtResource("13_x11yf")]
+layout_mode = 1
+offset_left = 45.0
+offset_top = 34.0
+offset_right = -357.0
+offset_bottom = -116.25903

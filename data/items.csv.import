@@ -6,10 +6,10 @@ uid="uid://cfin33aahxgfq"
 
 [deps]
 
-files=["res://data/items.name.translation", "res://data/items.effect.translation"]
+files=["res://data/items.name.translation", "res://data/items.kind.translation", "res://data/items.subkind.translation", "res://data/items.heal.translation", "res://data/items.heal.translation", "res://data/items.stackable.translation", "res://data/items.max.translation", "res://data/items.rarity.translation", "res://data/items.price.translation", "res://data/items.tooltip.translation"]
 
 source_file="res://data/items.csv"
-dest_files=["res://data/items.name.translation", "res://data/items.effect.translation"]
+dest_files=["res://data/items.name.translation", "res://data/items.kind.translation", "res://data/items.subkind.translation", "res://data/items.heal.translation", "res://data/items.heal.translation", "res://data/items.stackable.translation", "res://data/items.max.translation", "res://data/items.rarity.translation", "res://data/items.price.translation", "res://data/items.tooltip.translation"]
 
 [params]
 

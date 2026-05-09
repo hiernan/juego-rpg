@@ -3,13 +3,11 @@
 importer="csv_translation"
 type="Translation"
 uid="uid://bxgjlhtroe3l6"
+valid=false
 
 [deps]
 
-files=["res://data/enemies.name.translation", "res://data/enemies.hp.translation", "res://data/enemies.hp.translation", "res://data/enemies.dmg.translation", "res://data/enemies.dmg.translation", "res://data/enemies.gold.translation", "res://data/enemies.gold.translation", "res://data/enemies.xp.translation"]
-
 source_file="res://data/enemies.csv"
-dest_files=["res://data/enemies.name.translation", "res://data/enemies.hp.translation", "res://data/enemies.hp.translation", "res://data/enemies.dmg.translation", "res://data/enemies.dmg.translation", "res://data/enemies.gold.translation", "res://data/enemies.gold.translation", "res://data/enemies.xp.translation"]
 
 [params]
 
