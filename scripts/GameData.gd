@@ -186,41 +186,7 @@ var sell_ratio: float = 0.60	# el jugador vende al 60% del precio de compra
 var heal_full_cost: int = 15	# costo base de curar al 100% (overrideable más adelante)
 
 func _load_shop(shop: String, path: String) -> void:
-	var data := _read_csv(path)
-	if data.is_empty(): return
-	var headers: PackedStringArray = data[0]
-	var rows: Array = data[1]
-	var col: Dictionary = {}
-	for i in range(headers.size()):
-		col[headers[i]] = i
-
-	var dst: Dictionary = {}
-	for r in rows:
-		var row: PackedStringArray = r
-		var sid: String = String(row[col["id"]])
-		var stock_idx: int = int(col.get("stock", -1))
-		var stock: int
-		if stock_idx != -1 and stock_idx < row.size():
-			stock = _to_int(row[stock_idx])
-		else:
-			stock = -1
-
-		var pov_idx: int = int(col.get("price_override", -1))
-		var pov_raw: String
-		if pov_idx != -1 and pov_idx < row.size():
-			pov_raw = String(row[pov_idx])
-		else:
-			pov_raw = ""
-
-		var price_override: int
-		if pov_raw.strip_edges() == "":
-			price_override = -1
-		else:
-			price_override = _to_int(pov_raw)
-
-		dst[sid] = { "stock": stock, "price_override": price_override }
-
-	shops[shop] = dst
+	shops[shop] = DataLoadersScript.load_shop(path)
 
 func get_shop_items(shop: String) -> Array:
 	return ShopServiceScript.get_shop_items(self, shop)

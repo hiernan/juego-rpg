@@ -45,6 +45,33 @@ static func load_items(path: String) -> Dictionary:
 	return result
 
 
+static func load_shop(path: String) -> Dictionary:
+	var result: Dictionary = {}
+	var data := CsvLoaderScript.read_csv(path)
+	if data.is_empty():
+		return result
+
+	var headers: PackedStringArray = data[0]
+	var idx := _header_index(headers)
+	for r in data[1]:
+		var row: PackedStringArray = r
+		var id := _get_col(row, idx, "id")
+		if id == "":
+			continue
+
+		var stock := _to_int_default(_get_col(row, idx, "stock"), -1)
+		var price_override := -1
+		var price_override_raw := _get_col(row, idx, "price_override")
+		if price_override_raw.strip_edges() != "":
+			price_override = _to_int_default(price_override_raw, -1)
+
+		result[id] = {
+			"stock": stock,
+			"price_override": price_override,
+		}
+	return result
+
+
 static func load_weapons(path: String) -> Dictionary:
 	var result: Dictionary = {}
 	var data := CsvLoaderScript.read_csv(path)
