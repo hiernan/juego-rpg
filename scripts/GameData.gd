@@ -163,53 +163,14 @@ func _load_loot_tables(path: String) -> void:
 func _load_texts(path: String) -> void:
 	texts = DataLoadersScript.load_texts(path)
 
-# --- Equipment API mínima ---
-#func get_equipped_weapon_id() -> String:
-	#var v = equipment.get("weapon", null)
-	#return v if v is String else ""
-#
-#func set_equipped_weapon_id(id: String) -> void:
-	#equipment["weapon"] = id
-
 func get_equipped_armor_id() -> String:
 	return AvatarServiceScript.get_equipped_armor_id(self)
 
 func set_equipped_armor_id(id: String) -> void:
 	AvatarServiceScript.set_equipped_armor_id(self, id)
 
-# --- Helpers para mover 1 unidad por id simple ---
-func _remove_one(arr: Array, id: String) -> bool:
-	var idx := arr.find(id)
-	if idx != -1:
-		arr.remove_at(idx)
-		return true
-	return false
-
-func _add_one(arr: Array, id: String) -> void:
-	arr.append(id)
-
-# --- Equipar arma con swap ---
-# from_src: "inventory" o "stash"
 func equip_weapon(id: String, from_src: String) -> void:
-	if from_src == "inventory":
-		_remove_one(inventory, id)
-	elif from_src == "stash":
-		_remove_one(stash, id)
-
-	var old := ""
-	if equipped.has("weapon_id") and equipped.weapon_id:
-		old = String(equipped.weapon_id)
-
-	# Equipa la nueva
-	equipped.weapon_id = id
-
-	# La vieja al inventario (si había)
-	if old != "":
-		_add_one(inventory, old)
-
-	# Si tenés algún guardado/emit, llamalo acá (opcional):
-	# save()
-	# Events.player_state_changed.emit("weapon_changed")
+	move_item(from_src, "equipped_weapon", id, 1)
 
 func get_equipped_weapon_id() -> String:
 	return AvatarServiceScript.get_equipped_weapon_id(self)
@@ -218,52 +179,32 @@ func set_equipped_weapon_id(id: String) -> void:
 	AvatarServiceScript.set_equipped_weapon_id(self, id)
 
 func inventory_add(id: String) -> void:
-	inventory.append(id)
+	give_item("inventory", id, 1)
 
 func inventory_remove_first(id: String) -> bool:
-	var i := inventory.find(id)
-	if i != -1:
-		inventory.remove_at(i)
-		return true
-	return false
+	return take_item("inventory", id, 1)
 
 func stash_remove_first(id: String) -> bool:
-	var i := stash.find(id)
-	if i != -1:
-		stash.remove_at(i)
-		return true
-	return false
+	return take_item("stash", id, 1)
 
-func _remove_from_array_or_dict(ref: Variant, id: String, qty: int) -> bool:
-	# Diccionario: decrementa cantidad y borra si llega a 0.
-	if typeof(ref) == TYPE_DICTIONARY:
-		var d: Dictionary = ref
-		if not d.has(id):
-			return false
-		var current: int = int(d[id])
-		var new_qty: int = max(0, current - qty)
-		if new_qty > 0:
-			d[id] = new_qty
-		else:
-			d.erase(id)
-		return true
+func add_item_to_inventory(id: String, qty: int = 1) -> void:
+	give_item("inventory", id, qty)
 
-	# Array: elimina hasta 'qty' ocurrencias del id.
-	if typeof(ref) == TYPE_ARRAY:
-		var a: Array = ref
-		var removed: bool = false
-		var to_remove: int = qty
-		for i in range(a.size() - 1, -1, -1):
-			if to_remove <= 0:
-				break
-			if String(a[i]) == id:
-				a.remove_at(i)
-				to_remove -= 1
-				removed = true
-		return removed
+func add_item_to_stash(id: String, qty: int = 1) -> void:
+	give_item("stash", id, qty)
 
-	push_warning("remove_item_from_source: tipo de contenedor no soportado (%s)" % str(typeof(ref)))
-	return false
+func remove_item_from_inventory(id: String, qty: int = 1) -> void:
+	take_item("inventory", id, qty)
+
+func remove_item_from_stash(id: String, qty: int = 1) -> void:
+	take_item("stash", id, qty)
+
+func remove_item_from_source(id: String, from_src: String, qty: int = 1) -> void:
+	match from_src:
+		"inventory":
+			take_item("inventory", id, qty)
+		"stash", "baul":
+			take_item("stash", id, qty)
 
 # Devuelve el diccionario de un arma por id (o {} si no existe).
 func get_weapon(id: String) -> Dictionary:
@@ -275,43 +216,6 @@ func get_armor(id: String) -> Dictionary:
 
 func get_item_name_by_id(id: String) -> String:
 	return ItemCatalogServiceScript.get_item_name_by_id(self, id)
-
-func add_item_to_inventory(id: String, qty: int = 1) -> void:
-	for i in range(qty):
-		inventory.append(id)
-		
-func add_item_to_stash(id: String, qty: int = 1) -> void:
-	for i in range(qty):
-		stash.append(id)
-
-func remove_item_from_inventory(id: String, qty: int = 1) -> void:
-	var n := qty
-	while n > 0:
-		var idx := inventory.find(id)
-		if idx == -1:
-			break
-		inventory.remove_at(idx)
-		n -= 1
-
-func remove_item_from_stash(id: String, qty: int = 1) -> void:
-	var n := qty
-	while n > 0:
-		var idx := stash.find(id)
-		if idx == -1:
-			break
-		stash.remove_at(idx)
-		n -= 1
-
-# Útil para drag&drop: saca del origen según "from"
-func remove_item_from_source(id: String, from_src: String, qty: int = 1) -> void:
-	match from_src:
-		"inventory":
-			remove_item_from_inventory(id, qty)
-		"stash", "baul":
-			remove_item_from_stash(id, qty)
-		_:
-			# origen desconocido (equip slots no almacenan ítems como listas)
-			pass
 
 func get_item_tooltip(id: String) -> String:
 	return ItemCatalogServiceScript.get_item_tooltip(self, id)
