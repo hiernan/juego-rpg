@@ -747,76 +747,12 @@ func add_gold(amount: int) -> void:
 func shop_buy(shop: String, id: String, amount: int = 1) -> bool:
 	return ShopServiceScript.shop_buy(self, shop, id, amount)
 
-	if amount <= 0:
-		return false
-	var s: Dictionary = shops.get(shop, {})
-	if not s.has(id):
-		return false
-
-	# stock finito
-	var stock := int((s[id] as Dictionary).get("stock", -1))
-	if stock != -1 and stock < amount:
-		return false
-
-	var unit_price := get_shop_price(shop, id)
-	var total := unit_price * amount
-	if not pay_gold(total):
-		return false
-
-	# dar items al inventario (respeta stacks según tus helpers actuales)
-	give_item("inventory", id, amount)
-
-	# descontar stock si es finito
-	if stock != -1:
-		(s[id] as Dictionary)["stock"] = stock - amount
-		shops[shop] = s
-
-	return true
-
 func shop_sell(shop: String, id: String, amount: int = 1) -> bool:
 	return ShopServiceScript.shop_sell(self, shop, id, amount)
-
-	if amount <= 0:
-		return false
-
-	# verificar cantidad en inventario
-	var inv: Array = avatar.get("inventory", [])
-	var have := 0
-	for v in inv:
-		if String(v) == String(id):
-			have += 1
-	if have < amount:
-		return false
-
-	# quitar del inventario
-	if not take_item("inventory", id, amount):
-		return false
-
-	# pagar al jugador
-	var unit_price := get_shop_price(shop, id)
-	var unit_sell := int(floor(float(unit_price) * sell_ratio))
-	add_gold(unit_sell * amount)
-
-	# opcional: sumar stock al shop si es finito
-	var s: Dictionary = shops.get(shop, {})
-	if s.has(id):
-		var stock := int((s[id] as Dictionary).get("stock", -1))
-		if stock != -1:
-			(s[id] as Dictionary)["stock"] = stock + amount
-			shops[shop] = s
-
-	return true
 
 func heal_full(cost: int) -> bool:
 	return ShopServiceScript.heal_full(self, cost)
 
-	var hp_max := int(avatar.get("hp_max", avatar.get("max_hp", 0)))
-	if hp_max <= 0:
-		return false
-	if not pay_gold(cost):
-		return false
-	avatar["hp"] = hp_max
-	return true
 
 # Lee el string "from"/"to" y devuelve referencia al contenedor correcto.
 # No toca UI.
