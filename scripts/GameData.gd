@@ -1,5 +1,7 @@
 extends Node
 
+const InventoryServiceScript = preload("res://scripts/services/InventoryService.gd")
+
 # --- Diccionarios globales (por id) ---
 var enemies: Dictionary = {}			# id: {name, hp_min, hp_max, ...}
 var weapons: Dictionary = {}			# id: {name, slot, dmg_min, ...}
@@ -635,26 +637,11 @@ func get_item_tooltip(id: String) -> String:
 # ===== Helpers genéricos de contenedores (arrays de ids) =====
 
 func add_item_to_container(container_name: String, id: String, count: int) -> void:
-	# container_name: "inventory" o "stash"
-	if not avatar.has(container_name):
-		avatar[container_name] = []
-	var arr: Array = avatar[container_name]
-	for i in range(count):
-		arr.append(id)
-	avatar[container_name] = arr
+	InventoryServiceScript.add_item_to_container(self, container_name, id, count)
 
 
 func remove_item_from_container(container_name: String, id: String, count: int) -> void:
-	# Quita hasta 'count' ocurrencias de 'id' del contenedor
-	if not avatar.has(container_name):
-		return
-	var arr: Array = avatar[container_name]
-	var removed: int = 0
-	while removed < count and arr.has(id):
-		# erase() quita UNA ocurrencia si existe
-		arr.erase(id)
-		removed += 1
-	avatar[container_name] = arr
+	InventoryServiceScript.remove_item_from_container(self, container_name, id, count)
 
 # Compatibilidad con llamadas antiguas
 func get_kind_for_id(id: String) -> String:
@@ -750,8 +737,7 @@ func move_item_between_containers(from: String, to: String, id: String, amount: 
 
 # ¿Es stackeable? (por ahora solo items comunes)
 func is_stackable(id: String) -> bool:
-	var k := get_item_kind(id)
-	return k == "item"  # armas/armaduras NO se apilan
+	return InventoryServiceScript.is_stackable(self, id)
 
 func get_item_price(id: String) -> int:
 	var k := get_item_kind(id)
@@ -851,29 +837,11 @@ func heal_full(cost: int) -> bool:
 # Lee el string "from"/"to" y devuelve referencia al contenedor correcto.
 # No toca UI.
 func _get_container_ref(name: String) -> Variant:
-	if name == "inventory":
-		return avatar.get("inventory", [])
-	if name == "stash":
-		return avatar.get("stash", [])
-	if name == "equipped_weapon":
-		return avatar.get("weapon_id", "")
-	if name == "equipped_armor":
-		return avatar.get("armor_id", "")
-	return null
+	return InventoryServiceScript.get_container_ref(self, name)
 
 # Escribe el contenedor de vuelta (para equipped_* al ser String).
 func _set_container_ref(name: String, value: Variant) -> void:
-	match name:
-		"inventory":
-			avatar["inventory"] = value
-		"stash":
-			avatar["stash"] = value
-		"equipped_weapon":
-			avatar["weapon_id"] = String(value)
-		"equipped_armor":
-			avatar["armor_id"] = String(value)
-		_:
-			pass
+	InventoryServiceScript.set_container_ref(self, name, value)
 
 # Contrato único de movimiento. NO actualiza UI.
 # from: "inventory" | "stash" | "equipped_weapon" | "equipped_armor"
@@ -973,51 +941,10 @@ func move_item(from: String, to: String, id: String, qty: int = 1) -> bool:
 # DnD atómico — quitar y devolver (Variante A)
 
 func take_item(from: String, id: String, amount: int = 1) -> bool:
-	# Quita 'amount' unidades de 'from' sin ponerlas en otro lado
-	var ref = _get_container_ref(from)
-	if typeof(ref) == TYPE_ARRAY:
-		var arr: Array = ref
-		var removed: int = 0
-		var i: int = arr.size() - 1
-		while i >= 0 and removed < amount:
-			if String(arr[i]) == String(id):
-				arr.remove_at(i)
-				removed += 1
-			i -= 1
-
-		if removed > 0:
-			_set_container_ref(from, arr)
-
-		# true solo si pudimos quitar la cantidad pedida (evita ventas parciales raras)
-		return removed >= amount
-	else:
-		# Slots equipados (equipped_weapon / equipped_armor)
-		# Solo tiene sentido quitar 1
-		if amount != 1:
-			return false
-		var cur: String = String(ref)
-		if cur == String(id):
-			_set_container_ref(from, "")
-			return true
-		return false
+	return InventoryServiceScript.take_item(self, from, id, amount)
 
 func give_item(to: String, id: String, amount: int = 1) -> bool:
-	# Devuelve 'amount' unidades a 'to' sin tocar otros contenedores
-	var ref = _get_container_ref(to)
-	if typeof(ref) == TYPE_ARRAY:
-		var arr: Array = ref
-		for i in amount:
-			arr.append(String(id))
-		_set_container_ref(to, arr)
-		return true
-	else:
-		# Slots equipados (equipped_weapon / equipped_armor)
-		var cur := String(ref)
-		if cur == "":
-			_set_container_ref(to, String(id))
-			return true
-		# Si ya hay algo equipado, no sobrescribimos en 'give' (solo revert simple)
-		return false
+	return InventoryServiceScript.give_item(self, to, id, amount)
 # ─────────────────────────────────────────────────────────────────────
 
 # ─────────────────────────────────────────────────────────────────────
@@ -1067,6 +994,9 @@ func get_equipped_id(slot_kind: String) -> String:
 
 # ─────────────────────────────────────────────────────────────────────
 # LOOT BAG — bolsa temporal de botín durante misión
+
+func count_in_container(container: String, id: String) -> int:
+	return InventoryServiceScript.count_in_container(self, container, id)
 
 func loot_bag_reset() -> void:
 	# vacía la bolsa

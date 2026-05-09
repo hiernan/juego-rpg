@@ -152,12 +152,7 @@ func _is_stackable(id: String) -> bool:
 	return bool(row.get("stackable", false))
 
 func _count_in_inventory(id: String) -> int:
-	var inv: Array = GameData.avatar.get("inventory", [])
-	var c: int = 0
-	for v in inv:
-		if String(v) == id:
-			c += 1
-	return c
+	return GameData.count_in_container("inventory", id)
 
 func _open_qty_popup(mode: String, id: String, max_sel: int) -> void:
 	_qty_ctx.mode = mode
