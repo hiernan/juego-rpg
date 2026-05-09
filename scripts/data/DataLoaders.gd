@@ -45,6 +45,67 @@ static func load_items(path: String) -> Dictionary:
 	return result
 
 
+static func load_weapons(path: String) -> Dictionary:
+	var result: Dictionary = {}
+	var data := CsvLoaderScript.read_csv(path)
+	if data.is_empty():
+		return result
+
+	var headers: PackedStringArray = data[0]
+	var idx := _header_index(headers)
+	var has_kind: bool = idx.has("kind")
+	for r in data[1]:
+		var row: PackedStringArray = r
+		var id := _get_col(row, idx, "id")
+		if id == "":
+			continue
+
+		var kind_val := "weapon"
+		if has_kind:
+			var csv_kind := _get_col(row, idx, "kind")
+			if csv_kind != "":
+				kind_val = csv_kind
+
+		result[id] = {
+			"name": _get_col(row, idx, "name"),
+			"dmg_min": _to_int_default(_get_col(row, idx, "dmg_min")),
+			"dmg_max": _to_int_default(_get_col(row, idx, "dmg_max")),
+			"price": _to_int_default(_get_col(row, idx, "price")),
+			"kind": kind_val,
+		}
+	return result
+
+
+static func load_armors(path: String) -> Dictionary:
+	var result: Dictionary = {}
+	var data := CsvLoaderScript.read_csv(path)
+	if data.is_empty():
+		return result
+
+	var headers: PackedStringArray = data[0]
+	var idx := _header_index(headers)
+	var has_kind: bool = idx.has("kind")
+	for r in data[1]:
+		var row: PackedStringArray = r
+		var id := _get_col(row, idx, "id")
+		if id == "":
+			continue
+
+		var kind_val := "armor"
+		if has_kind:
+			var csv_kind := _get_col(row, idx, "kind")
+			if csv_kind != "":
+				kind_val = csv_kind
+
+		result[id] = {
+			"name": _get_col(row, idx, "name"),
+			"armor": _to_int_default(_get_col(row, idx, "armor")),
+			"price": _to_int_default(_get_col(row, idx, "price")),
+			"kind": kind_val,
+		}
+	return result
+
+
 static func load_combat_constants(path: String) -> Dictionary:
 	var result: Dictionary = {}
 	var data := CsvLoaderScript.read_csv(path)

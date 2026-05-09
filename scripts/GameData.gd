@@ -262,63 +262,10 @@ func _load_enemies(path: String) -> void:
 		enemies[id] = item
 
 func _load_weapons(path: String) -> void:
-	var data := _read_csv(path)
-	if data.is_empty(): return
-	var headers: PackedStringArray = data[0]
-	var rows: Array = data[1]
-	var col: Dictionary = {}
-	for i in range(headers.size()):
-		col[headers[i]] = i
-
-	var has_kind: bool = col.has("kind")
-
-	for r in rows:
-		var row: PackedStringArray = r
-		var id: String = String(row[col["id"]])
-
-		var kind_val: String = "weapon"
-		if has_kind:
-			var kv := String(row[col["kind"]])
-			if kv != "":
-				kind_val = kv
-
-		var item := {
-			"name": row[col["name"]],
-			"dmg_min": _to_int(row[col["dmg_min"]]),
-			"dmg_max": _to_int(row[col["dmg_max"]]),
-			"price": _to_int(row[col["price"]]),
-			"kind": kind_val,
-		}
-		weapons[id] = item
+	weapons = DataLoadersScript.load_weapons(path)
 
 func _load_armors(path: String) -> void:
-	var data := _read_csv(path)
-	if data.is_empty(): return
-	var headers: PackedStringArray = data[0]
-	var rows: Array = data[1]
-	var col: Dictionary = {}
-	for i in range(headers.size()):
-		col[headers[i]] = i
-
-	var has_kind: bool = col.has("kind")
-
-	for r in rows:
-		var row: PackedStringArray = r
-		var id: String = String(row[col["id"]])
-
-		var kind_val: String = "armor"
-		if has_kind:
-			var kv := String(row[col["kind"]])
-			if kv != "":
-				kind_val = kv
-
-		var item := {
-			"name": row[col["name"]],
-			"armor": _to_int(row[col["armor"]]),
-			"price": _to_int(row[col["price"]]),
-			"kind": kind_val,
-		}
-		armors[id] = item
+	armors = DataLoadersScript.load_armors(path)
 
 func get_item_by_id(id: String) -> Dictionary:
 	# Usa el kind si existe para buscar en la tabla correcta
