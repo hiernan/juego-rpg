@@ -29,17 +29,11 @@ var run_rewards := {
 
 var events: Array[Dictionary] = []        # cola de eventos de la misión
 var waiting_dots := false
-var dots_elapsed := 0
-var dots_target := 0
-var pending_event: Dictionary = {}        # guardamos el evento que requiere espera
 var line_queue: Array = []     # cola de renglones a imprimir
 var next_delay: float = 1.5            # delay entre líneas (lo maneja TimerTick)
 var dots_plan: Dictionary = {}	# guarda {min,max,ev} para iniciar puntos en el próximo tick
 var dots_remaining: int = 0
 var _result_bag: Array = []
-
-# Cola de líneas/efectos ya la tenés como line_queue (usamos Variant)
-var effect_queue: Array = []	# por si preferís separar (no obligatorio)
 
 # Enemigo actual (cuando hay combate)
 var current_enemy := {
@@ -165,17 +159,26 @@ func _on_timer_tick_timeout() -> void:
 		"enemy":
 			_resolve_enemy_as_lines(ev)
 		"trap":
-			var dmin: int = int(ev.get("dmg_min", 1))
-			var dmax: int = int(ev.get("dmg_max", 1))
-			var dmg: int = randi_range(dmin, dmax)
-			GameData.apply_damage(dmg)
-			_enqueue_lines([
-				_fmt_gm("¡Trampa! Te hiere (%d de daño)." % [dmg])
-			], 1.3)
+			var trap_result: Dictionary = MissionRunnerServiceScript.resolve_trap_event(GameData, ev)
+			var trap_damage: int = int(trap_result.get("damage", 0))
+			if trap_damage > 0:
+				GameData.apply_damage(trap_damage)
+			var trap_lines: Array = []
+			for line in (trap_result.get("lines", []) as Array):
+				trap_lines.append(_fmt_gm(String(line)))
+			_enqueue_lines(trap_lines, 1.3)
 		"loot":
-			_enqueue_lines([
-				_fmt_gm("Encontrás un cofre con 7 de oro.")
-			], 1.2)
+			var loot_result: Dictionary = MissionRunnerServiceScript.resolve_loot_event(GameData, ev)
+			var loot_lines: Array = []
+			for line in (loot_result.get("lines", []) as Array):
+				loot_lines.append(_fmt_gm(String(line)))
+			var loot_rewards: Dictionary = loot_result.get("rewards", {})
+			_enqueue_apply_reward(
+				int(loot_rewards.get("gold", 0)),
+				int(loot_rewards.get("xp", 0)),
+				(loot_rewards.get("items", []) as Array).duplicate()
+			)
+			_enqueue_lines(loot_lines, 1.2)
 		"end":
 			_finish_mission()
 		_:
@@ -195,15 +198,6 @@ func _start_search_dots() -> void:
 
 	# mientras hay puntos, no seguimos procesando la cola
 	# (el _on_timer_tick_timeout() ya retorna si waiting_dots = true)
-
-# ---------- Puntos suspensivos ----------
-func _start_dots_rng(min_s: int, max_s: int, ev: Dictionary) -> void:
-	waiting_dots = true
-	dots_elapsed = 0
-	dots_target = randi_range(min_s, max_s)
-	pending_event = ev
-	timer_tick.stop()
-	timer_dots.start()  # 1 punto por segundo
 
 func _on_timer_dots_timeout() -> void:
 	if dots_remaining > 0:
@@ -255,14 +249,6 @@ func _resolve_enemy_as_lines(ev: Dictionary) -> void:
 	# --- ARRANCAR RONDAS DE COMBATE ---
 	line_queue.append({"apply": {"type": "combat_next"}})
 	return
-
-func _resolve_trap(ev: Dictionary) -> void:
-	_append_gm("Una trampa de dardos se activa. Te roza (1 de daño).")
-	# TODO: aplicar daño real
-
-func _resolve_loot(ev: Dictionary) -> void:
-	_append_gm("Encontrás un cofre con 7 de oro.")
-	# TODO: sumar oro real
 
 # ---------- Finalización / abandono ----------
 func _finish_mission() -> void:
@@ -446,29 +432,6 @@ func _apply_marker(d: Dictionary) -> void:
 				GameData.take_item("inventory", id, 1)
 			_refresh_loot_ui()
 
-func _auto_potion_if_needed() -> void:
-	var hp := GameData.get_hp()
-	var hp_max := GameData.get_max_hp()
-	if hp_max <= 0: return
-	if float(hp) / float(hp_max) > 0.25: return
-
-	# ¿tenemos poción? preferimos ítem de la RUN; si no, del inventario del avatar
-	var has := false
-	for id in (run_rewards["items"] as Array):
-		if id == "potion_small":
-			has = true
-			break
-	if not has:
-		for id2 in GameData.get_container_items("inventory"):
-			if id2 == "potion_small":
-				has = true
-				break
-	if not has: return
-
-	# mostrá la línea y encolá el consumo (APPLY luego del texto)
-	_enqueue_lines([_fmt_avatar("Tomo una poción…")], 0.8)
-	_enqueue_consume_item("potion_small", 5)
-
 func _combat_round() -> void:
 	# Seguridad: si no hay enemigo activo, no hacer nada
 	if String(current_enemy.get("id", "")) == "":
@@ -477,7 +440,6 @@ func _combat_round() -> void:
 	var enemy_name: String = String(current_enemy["name"])
 
 	# --- 1) Enemigo ataca ---
-	var armor_val := GameData.get_armor_value()
 	var e_lvl := int(current_enemy["level"])
 	var a_lvl := Combat.get_avatar_level()
 
@@ -558,11 +520,17 @@ func _combat_round() -> void:
 
 	# ¿Murió?
 	if int(current_enemy["hp"]) <= 0:
-		var gold_gain := randi_range(int(current_enemy["gold_min"]), int(current_enemy["gold_max"]))
-		var xp_gain := int(current_enemy["xp"])
-		_enqueue_lines([_fmt_gm("El %s cae. +%d oro, +%d XP" % [enemy_name, gold_gain, xp_gain])], 1.0)
-		# Aplicar DESPUÉS del texto
-		_enqueue_apply_reward(gold_gain, xp_gain, [])
+		var defeat_result: Dictionary = MissionRunnerServiceScript.resolve_enemy_defeat(current_enemy)
+		var defeat_lines: Array = []
+		for line in (defeat_result.get("lines", []) as Array):
+			defeat_lines.append(_fmt_gm(String(line)))
+		var defeat_rewards: Dictionary = defeat_result.get("rewards", {})
+		_enqueue_lines(defeat_lines, 1.0)
+		_enqueue_apply_reward(
+			int(defeat_rewards.get("gold", 0)),
+			int(defeat_rewards.get("xp", 0)),
+			(defeat_rewards.get("items", []) as Array).duplicate()
+		)
 		# Limpieza del enemigo actual
 		current_enemy["id"] = ""
 		return

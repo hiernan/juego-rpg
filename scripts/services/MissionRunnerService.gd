@@ -4,6 +4,17 @@ class_name MissionRunnerService
 
 const Combat = preload("res://scripts/Combat.gd")
 
+static func _build_reward_result(lines: Array[String], gold: int = 0, xp: int = 0, items: Array = []) -> Dictionary:
+	return {
+		"lines": lines,
+		"rewards": {
+			"gold": gold,
+			"xp": xp,
+			"items": items.duplicate(),
+		},
+	}
+
+
 static func resolve_search_room(game_data, event_data: Dictionary) -> Dictionary:
 	var lines: Array[String] = []
 	var rewards := {
@@ -53,6 +64,22 @@ static func resolve_search_room(game_data, event_data: Dictionary) -> Dictionary
 	}
 
 
+static func resolve_trap_event(_game_data, event_data: Dictionary) -> Dictionary:
+	var damage_min: int = int(event_data.get("dmg_min", 1))
+	var damage_max: int = int(event_data.get("dmg_max", max(damage_min, 1)))
+	var damage: int = randi_range(damage_min, damage_max)
+	return {
+		"lines": ["¡Trampa! Te hiere (%d de daño)." % damage],
+		"damage": damage,
+	}
+
+
+static func resolve_loot_event(_game_data, event_data: Dictionary) -> Dictionary:
+	var gold_amount: int = int(event_data.get("gold", 7))
+	var line := "Encontrás un cofre con %d de oro." % gold_amount
+	return _build_reward_result([line], gold_amount)
+
+
 static func build_enemy_instance(game_data, enemy_id: String) -> Dictionary:
 	var enemy_data: Dictionary = game_data.get_enemy(enemy_id)
 	var enemy := {
@@ -75,3 +102,11 @@ static func build_enemy_instance(game_data, enemy_id: String) -> Dictionary:
 	enemy["hp"] = randi_range(hp_min, hp_max)
 	enemy["hp_max"] = hp_max
 	return enemy
+
+
+static func resolve_enemy_defeat(enemy_data: Dictionary) -> Dictionary:
+	var gold_gain := randi_range(int(enemy_data.get("gold_min", 1)), int(enemy_data.get("gold_max", 1)))
+	var xp_gain := int(enemy_data.get("xp", 0))
+	var enemy_name := String(enemy_data.get("name", "enemigo"))
+	var line := "El %s cae. +%d oro, +%d XP" % [enemy_name, gold_gain, xp_gain]
+	return _build_reward_result([line], gold_gain, xp_gain)
