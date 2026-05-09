@@ -17,20 +17,11 @@ var locations: Dictionary = {}			# id: {name, flavor_ids[], monster_ids[], ...}
 var loot_tables: Dictionary = {}		# id: [{type, weight}, ...]
 var texts: Dictionary = {}				# id: {type, text_es}
 var items: Dictionary = {}
-var inventory: Array[String] = []
-var stash: Array[String] = []
 var loot_bag: Array = []
-var equipped: Dictionary = {"weapon": "", "armor": ""}
 var auto_potion_threshold: float = 0.25	# 25%
 var auto_potion_item_id: String = "potion_small"
 var _auto_potion_suppressed: bool = false	# evita spameo hasta salir del umbral
 var combat_constants := {}
-
-# Equipo actual del avatar
-var equipment := {
-	"weapon": null,
-	"armor": null,
-}
 
 # --- Estado del Avatar (persistente) ---
 var avatar := {

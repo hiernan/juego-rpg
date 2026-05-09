@@ -67,12 +67,13 @@ static func on_death(game_data) -> void:
 
 
 static func get_equipped_armor_id(game_data) -> String:
-	var value: Variant = game_data.equipment.get("armor", null)
-	return value if value is String else ""
+	return str(game_data.avatar.get("armor_id", ""))
 
 
 static func set_equipped_armor_id(game_data, id: String) -> void:
-	game_data.equipment["armor"] = id
+	if not game_data.avatar.has("armor_id"):
+		game_data.avatar["armor_id"] = ""
+	game_data.avatar["armor_id"] = id
 
 
 static func get_equipped_weapon_id(game_data) -> String:
