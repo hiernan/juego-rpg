@@ -3,6 +3,7 @@ extends Node
 const InventoryServiceScript = preload("res://scripts/services/InventoryService.gd")
 const ShopServiceScript = preload("res://scripts/services/ShopService.gd")
 const CombatFormulaServiceScript = preload("res://scripts/services/CombatFormulaService.gd")
+const LootBagServiceScript = preload("res://scripts/services/LootBagService.gd")
 const DataLoadersScript = preload("res://scripts/data/DataLoaders.gd")
 const DataCatalogScript = preload("res://scripts/data/DataCatalog.gd")
 
@@ -533,210 +534,49 @@ func count_in_container(container: String, id: String) -> int:
 	return InventoryServiceScript.count_in_container(self, container, id)
 
 func loot_bag_reset() -> void:
-	# vacía la bolsa
-	loot_bag = []
-	print("[LOOT] reset")
+	LootBagServiceScript.reset(self)
 
 func loot_bag_add(id: String) -> void:
-	# agrega 1 ítem a la bolsa si el id es válido
-	if id == "":
-		print("[LOOT] WARN: id vacío")
-		return
-	var k: String = get_item_kind(id)
-	if k == "":
-		print("[LOOT] WARN: id desconocido=", id)
-		return
-	loot_bag.append(String(id))
-	print("[LOOT] add id=", id, " bag_size=", loot_bag.size())
+	LootBagServiceScript.add(self, id)
 
 func consolidate_loot_bag_to_inventory() -> void:
-	# pasa todo el contenido de la bolsa al inventario y vacía la bolsa
-	var inv: Array = _get_container_ref("inventory")
-	for id in loot_bag:
-		inv.append(String(id))
-	_set_container_ref("inventory", inv)
-	print("[LOOT] consolidate -> +", loot_bag.size(), " items a inventario (total inv=", inv.size(), ")")
-	loot_bag = []
-
-# ─────────────────────────────────────────────────────────────────────
-# Eventos de fin de misión
+	LootBagServiceScript.consolidate_to_inventory(self)
 
 func on_mission_success() -> void:
-	# éxito: consolidar bolsa a inventario
-	print("[MISSION] success: consolidating loot bag")
-	consolidate_loot_bag_to_inventory()
+	LootBagServiceScript.on_mission_success(self)
 
 func on_mission_abandon() -> void:
-	# abandono: mismo trato que éxito (definición actual)
-	print("[MISSION] abandon: consolidating loot bag")
-	consolidate_loot_bag_to_inventory()
+	LootBagServiceScript.on_mission_abandon(self)
 
 func on_mission_death() -> void:
-	# muerte: se pierde TODO (bolsa + inventario + equipados)
-	print("[DEATH] mission death: losing loot bag, inventory and equipped")
-	# perder bolsa
-	loot_bag = []
-	# limpiar inventario
-	_set_container_ref("inventory", [])
-	# limpiar equipados
-	_set_container_ref("equipped_weapon", "")
-	_set_container_ref("equipped_armor", "")
-
-# ─────────────────────────────────────────────────────────────────────
-# LOOT BAG — inventario activo durante la misión
+	LootBagServiceScript.on_mission_death(self)
 
 func transfer_inventory_to_bag() -> void:
-	# Mueve TODO el inventario a la bolsa y deja inventario vacío
-	var inv: Array = []
-	var inv_ref = _get_container_ref("inventory")
-	if typeof(inv_ref) == TYPE_ARRAY:
-		inv = inv_ref
-	else:
-		# Fallback por si el inventario está anidado en avatar["inventory"]
-		var av_inv = avatar.get("inventory", [])
-		if typeof(av_inv) == TYPE_ARRAY:
-			inv = av_inv
-	# mover
-	var moved := inv.size()
-	for id in inv:
-		loot_bag.append(String(id))
-	# vaciar inventario en ambos lugares por las dudas
-	_set_container_ref("inventory", [])
-	if "inventory" in avatar:
-		avatar["inventory"] = []
-	print("[LOOT] transfer_inventory_to_bag: moved=", moved, " bag_size=", loot_bag.size())
-
+	LootBagServiceScript.transfer_inventory_to_bag(self)
 
 func bag_count(id: String) -> int:
-	# Cuenta cuántas unidades de 'id' hay en la bolsa
-	if id == "":
-		return 0
-	var c := 0
-	for x in loot_bag:
-		if String(x) == String(id):
-			c += 1
-	return c
+	return LootBagServiceScript.count(self, id)
 
 func bag_has(id: String, amount: int = 1) -> bool:
-	# ¿Hay al menos 'amount' unidades de 'id' en la bolsa?
-	return bag_count(id) >= max(1, amount)
+	return LootBagServiceScript.has(self, id, amount)
 
 func bag_consume(id: String, amount: int = 1) -> bool:
-	# Quita 'amount' unidades de 'id' desde la bolsa (si hay suficientes)
-	if id == "" or amount <= 0:
-		return false
-	var removed := 0
-	# remove_at mientras contamos (recorremos por índice)
-	for i in range(loot_bag.size()):
-		if removed >= amount:
-			break
-		if String(loot_bag[i]) == String(id):
-			loot_bag.remove_at(i)
-			removed += 1
-			i -= 1
-	var ok := (removed == amount)
-	print("[LOOT] bag_consume id=", id, " amount=", amount, " ok=", ok, " bag_size=", loot_bag.size())
-	return ok
+	return LootBagServiceScript.consume(self, id, amount)
 
-# Efecto de poción (curación básica). LEE: ajusta según tus columnas reales.
 func apply_potion_effect(id: String) -> int:
-	# Curación basada en CSV (heal_pct/ heal_hp)
-	var av = avatar
-	var hp_max: int = int(av.get("hp_max", av.get("max_hp", 0)))
-	var hp_cur: int = int(av.get("hp", 0))
-	var heal: int = get_heal_amount_from_item(id, hp_max)
-
-	if heal > 0 and hp_max > 0:
-		var new_hp: int = min(hp_cur + heal, hp_max)
-		avatar["hp"] = new_hp
-		print("[POTION] use id=%s +%d HP (%d→%d/%d)" % [id, heal, hp_cur, new_hp, hp_max])
-	else:
-		print("[POTION] WARN: sin curación válida para id=", id)
-	return heal
-
-# ─────────────────────────────────────────────────────────────────────
-# HEAL HELPERS — leen curación desde items.csv (kind/subkind, heal_pct/heal_hp)
+	return LootBagServiceScript.apply_potion_effect(self, id)
 
 func is_healing_item(id: String) -> bool:
-	# Un ítem es "curativo" si kind=consumable y subkind=heal
-	var items_dict = self.get("items")
-	if typeof(items_dict) != TYPE_DICTIONARY:
-		return false
-	var row = items_dict.get(id, {})
-	if typeof(row) != TYPE_DICTIONARY:
-		return false
-	var kind: String = String(row.get("kind", ""))
-	var subkind: String = String(row.get("subkind", ""))
-	return (kind == "consumable" and subkind == "heal")
-
+	return LootBagServiceScript.is_healing_item(self, id)
 
 func get_heal_amount_from_item(id: String, hp_max: int) -> int:
-	# Devuelve cuántos HP cura 'id' en base a heal_pct (prioritario) o heal_hp
-	var items_dict = self.get("items")
-	if typeof(items_dict) != TYPE_DICTIONARY:
-		return 0
-	var row = items_dict.get(id, {})
-	if typeof(row) != TYPE_DICTIONARY:
-		return 0
-
-	var heal_pct: int = int(row.get("heal_pct", 0))
-	var heal_hp: int = int(row.get("heal_hp", 0))
-
-	if heal_pct > 0 and hp_max > 0:
-		var amt: int = int(ceil(float(hp_max) * float(heal_pct) * 0.01))
-		return max(amt, 1)  # al menos 1
-	return max(heal_hp, 0)
+	return LootBagServiceScript.get_heal_amount_from_item(self, id, hp_max)
 
 func bag_list_healing() -> Array:
-	# Lista curativos en la BOLSA, devolviendo {id, count, heal} por cada id
-	var result: Array = []
-	var items_dict = self.get("items")
-	if typeof(items_dict) != TYPE_DICTIONARY:
-		return result
-
-	# Agrupar por id dentro de la bolsa
-	var counts: Dictionary = {}
-	for x in loot_bag:
-		var iid := String(x)
-		# Solo contamos curativos
-		var row = items_dict.get(iid, {})
-		if typeof(row) != TYPE_DICTIONARY:
-			continue
-		var kind: String = String(row.get("kind", ""))
-		var subkind: String = String(row.get("subkind", ""))
-		if not (kind == "consumable" and subkind == "heal"):
-			continue
-		counts[iid] = int(counts.get(iid, 0)) + 1
-
-	# Necesitamos hp_max para calcular heal_pct
-	var av = avatar
-	var hp_max: int = int(av.get("hp_max", av.get("max_hp", 0)))
-
-	# Armar salida con heal calculado
-	for iid in counts.keys():
-		var heal_amt: int = get_heal_amount_from_item(String(iid), hp_max)
-		if heal_amt > 0:
-			result.append({
-				"id": String(iid),
-				"count": int(counts[iid]),
-				"heal": heal_amt
-			})
-	return result
-
+	return LootBagServiceScript.list_healing(self)
 
 func pick_best_heal_from_bag() -> String:
-	# Elige el id curativo con MAYOR curación (heal) disponible en la bolsa
-	var options: Array = bag_list_healing()
-	if options.is_empty():
-		return ""
-	var best_id: String = ""
-	var best_heal: int = -1
-	for opt in options:
-		var h: int = int(opt.get("heal", 0))
-		if h > best_heal:
-			best_heal = h
-			best_id = String(opt.get("id", ""))
-	return best_id
+	return LootBagServiceScript.pick_best_heal_from_bag(self)
 
 func _load_items(path: String) -> void:
 	items = DataLoadersScript.load_items(path)
@@ -757,11 +597,7 @@ func get_item_display_name(id: String) -> String:
 	return id
 
 func loot_bag_to_inventory() -> void:
-	for x in loot_bag:
-		var iid: String = String(x)
-		give_item("inventory", iid, 1)
-	loot_bag.clear()
-	print("[LOOT] bag → inventory")
+	LootBagServiceScript.bag_to_inventory(self)
 
 # ========== Combat Helpers (ATK/DEF + DR) ==========
 func _cc_get(key: String, defval: float) -> float:
