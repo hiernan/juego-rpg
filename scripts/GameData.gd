@@ -1,6 +1,7 @@
 extends Node
 
 const InventoryServiceScript = preload("res://scripts/services/InventoryService.gd")
+const ShopServiceScript = preload("res://scripts/services/ShopService.gd")
 
 # --- Diccionarios globales (por id) ---
 var enemies: Dictionary = {}			# id: {name, hp_min, hp_max, ...}
@@ -241,21 +242,13 @@ func _load_shop(shop: String, path: String) -> void:
 	shops[shop] = dst
 
 func get_shop_items(shop: String) -> Array:
-	var s: Dictionary = shops.get(shop, {})
-	return s.keys()
+	return ShopServiceScript.get_shop_items(self, shop)
 
 func get_shop_stock(shop: String, id: String) -> int:
-	var s: Dictionary = shops.get(shop, {})
-	if not s.has(id): return 0
-	return int((s[id] as Dictionary).get("stock", -1))
+	return ShopServiceScript.get_shop_stock(self, shop, id)
 
 func get_shop_price(shop: String, id: String) -> int:
-	var s: Dictionary = shops.get(shop, {})
-	var base := get_item_price(id)
-	if not s.has(id):
-		return base
-	var pov := int((s[id] as Dictionary).get("price_override", -1))
-	return base if pov < 0 else pov
+	return ShopServiceScript.get_shop_price(self, shop, id)
 
 
 # --- Loaders específicos ---
@@ -740,33 +733,20 @@ func is_stackable(id: String) -> bool:
 	return InventoryServiceScript.is_stackable(self, id)
 
 func get_item_price(id: String) -> int:
-	var k := get_item_kind(id)
-	if k == "weapon" and weapons.has(id):
-		return int((weapons[id] as Dictionary).get("price", 0))
-	if k == "armor" and armors.has(id):
-		return int((armors[id] as Dictionary).get("price", 0))
-	if k == "item" and items.has(id):
-		return int((items[id] as Dictionary).get("price", 0))
-	return 0
+	return ShopServiceScript.get_item_price(self, id)
 
 func can_afford(cost: int) -> bool:
-	return int(avatar.get("gold", 0)) >= cost
+	return ShopServiceScript.can_afford(self, cost)
 
 func pay_gold(cost: int) -> bool:
-	if cost <= 0:
-		return true
-	var gold := int(avatar.get("gold", 0))
-	if gold < cost:
-		return false
-	avatar["gold"] = gold - cost
-	return true
+	return ShopServiceScript.pay_gold(self, cost)
 
 func add_gold(amount: int) -> void:
-	if amount <= 0:
-		return
-	avatar["gold"] = int(avatar.get("gold", 0)) + amount
+	ShopServiceScript.add_gold(self, amount)
 
 func shop_buy(shop: String, id: String, amount: int = 1) -> bool:
+	return ShopServiceScript.shop_buy(self, shop, id, amount)
+
 	if amount <= 0:
 		return false
 	var s: Dictionary = shops.get(shop, {})
@@ -794,6 +774,8 @@ func shop_buy(shop: String, id: String, amount: int = 1) -> bool:
 	return true
 
 func shop_sell(shop: String, id: String, amount: int = 1) -> bool:
+	return ShopServiceScript.shop_sell(self, shop, id, amount)
+
 	if amount <= 0:
 		return false
 
@@ -826,6 +808,8 @@ func shop_sell(shop: String, id: String, amount: int = 1) -> bool:
 	return true
 
 func heal_full(cost: int) -> bool:
+	return ShopServiceScript.heal_full(self, cost)
+
 	var hp_max := int(avatar.get("hp_max", avatar.get("max_hp", 0)))
 	if hp_max <= 0:
 		return false
