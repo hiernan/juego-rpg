@@ -69,7 +69,7 @@ func _refresh_inventory_list() -> void:
 	var inv: Array = GameData.get_container_items("inventory")
 	for v in inv:
 		var id := String(v)
-		var row: Dictionary = GameData.items.get(id, {})
+		var row: Dictionary = GameData.get_item_by_id(id)
 		if row.get("subkind", "") != "heal":
 			continue
 		counts[id] = int(counts.get(id, 0)) + 1
@@ -132,7 +132,7 @@ func _on_drop_healer_from_shop(id: String) -> void:
 func _on_drop_shop_from_inventory(id: String) -> void:
 	# Solo vender curativas acá (lo que mostrás en la lista); si quisieras vender otras,
 	# sacá este filtro.
-	var row: Dictionary = GameData.items.get(id, {})
+	var row: Dictionary = GameData.get_item_by_id(id)
 	if String(row.get("subkind", "")) != "heal":
 		return
 	if _is_stackable(id):
@@ -146,7 +146,7 @@ func _on_drop_shop_from_inventory(id: String) -> void:
 	_refresh_gold(); _refresh_shop_list(); _refresh_inventory_list()
 
 func _is_stackable(id: String) -> bool:
-	var row: Dictionary = GameData.items.get(id, {})
+	var row: Dictionary = GameData.get_item_by_id(id)
 	return bool(row.get("stackable", false))
 
 func _count_in_inventory(id: String) -> int:

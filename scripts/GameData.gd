@@ -157,6 +157,34 @@ func _load_armors(path: String) -> void:
 func get_item_by_id(id: String) -> Dictionary:
 	return ItemCatalogServiceScript.get_item_by_id(self, id)
 
+func has_enemy(id: String) -> bool:
+	return enemies.has(id)
+
+func get_enemy(id: String) -> Dictionary:
+	return (enemies.get(id, {}) as Dictionary).duplicate(true)
+
+func has_location(id: String) -> bool:
+	return locations.has(id)
+
+func get_location(id: String) -> Dictionary:
+	return (locations.get(id, {}) as Dictionary).duplicate(true)
+
+func has_loot_table(id: String) -> bool:
+	return loot_tables.has(id)
+
+func get_loot_table_entries(id: String) -> Array:
+	return (loot_tables.get(id, []) as Array).duplicate(true)
+
+func get_data_counts() -> Dictionary:
+	return {
+		"enemies": enemies.size(),
+		"weapons": weapons.size(),
+		"armors": armors.size(),
+		"locations": locations.size(),
+		"loot_tables": loot_tables.size(),
+		"texts": texts.size(),
+	}
+
 func _load_locations(path: String) -> void:
 	locations = DataLoadersScript.load_locations(path)
 
@@ -213,9 +241,15 @@ func remove_item_from_source(id: String, from_src: String, qty: int = 1) -> void
 func get_weapon(id: String) -> Dictionary:
 	return ItemCatalogServiceScript.get_weapon(self, id)
 
+func has_weapon(id: String) -> bool:
+	return weapons.has(id)
+
 # (Opcional, por paridad con armas; no rompe nada dejarla.)
 func get_armor(id: String) -> Dictionary:
 	return ItemCatalogServiceScript.get_armor(self, id)
+
+func has_armor(id: String) -> bool:
+	return armors.has(id)
 
 func get_item_name_by_id(id: String) -> String:
 	return ItemCatalogServiceScript.get_item_name_by_id(self, id)

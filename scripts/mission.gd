@@ -220,8 +220,8 @@ func _on_timer_dots_timeout() -> void:
 
 	# loot table (nuevo esquema item_id)
 	var lt_id: String = String(ev.get("loot_table_id", ""))
-	if lt_id != "" and GameData.loot_tables.has(lt_id):
-		var entries: Array = GameData.loot_tables[lt_id] as Array
+	if lt_id != "" and GameData.has_loot_table(lt_id):
+		var entries: Array = GameData.get_loot_table_entries(lt_id)
 		var pick := GameData.pick_weighted(entries)
 		var item_id: String = String(pick.get("item_id", ""))
 
@@ -242,12 +242,12 @@ func _on_timer_dots_timeout() -> void:
 					result_lines.append(_fmt_gm("Encontrás una poción menor de curación."))
 					_enqueue_apply_reward(0, 0, ["potion_small"])
 				_:
-					if GameData.weapons.has(item_id):
-						var wname: String = String(GameData.weapons[item_id].get("name", "arma"))
+					if GameData.has_weapon(item_id):
+						var wname: String = GameData.get_item_display_name(item_id)
 						result_lines.append(_fmt_gm("Encontrás un %s." % wname))
 						_enqueue_apply_reward(0, 0, [item_id])
-					elif GameData.armors.has(item_id):
-						var aname: String = String(GameData.armors[item_id].get("name", "armadura"))
+					elif GameData.has_armor(item_id):
+						var aname: String = GameData.get_item_display_name(item_id)
 						result_lines.append(_fmt_gm("Encontrás %s." % aname))
 						_enqueue_apply_reward(0, 0, [item_id])
 					else:
@@ -274,7 +274,7 @@ func _scroll_to_bottom() -> void:
 func _resolve_enemy_as_lines(ev: Dictionary) -> void:
 	# 1) Cargar definición
 	var enemy_id: String = String(ev.get("id", "goblin"))
-	var def: Dictionary = GameData.enemies.get(enemy_id, {})
+	var def: Dictionary = GameData.get_enemy(enemy_id)
 	current_enemy = {
 		"id": enemy_id,
 		"name": String(def.get("name", enemy_id.capitalize())),

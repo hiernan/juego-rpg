@@ -68,13 +68,14 @@ func _ready() -> void:
 
 func _on_button_recargar_datos_pressed() -> void:
 	GameData.load_all()
+	var counts: Dictionary = GameData.get_data_counts()
 	print("Cargados: %d enemigos, %d armas, %d armaduras, %d locaciones, %d loot tables, %d textos" % [
-		GameData.enemies.size(),
-		GameData.weapons.size(),
-		GameData.armors.size(),
-		GameData.locations.size(),
-		GameData.loot_tables.size(),
-		GameData.texts.size()
+		int(counts.get("enemies", 0)),
+		int(counts.get("weapons", 0)),
+		int(counts.get("armors", 0)),
+		int(counts.get("locations", 0)),
+		int(counts.get("loot_tables", 0)),
+		int(counts.get("texts", 0))
 	])
 
 func _on_hotspot_inn_mouse_entered() -> void:

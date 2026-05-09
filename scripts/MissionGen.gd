@@ -9,7 +9,7 @@ static func build_sequence(location_id: String, length_tag: String = "short") ->
 	var seq: Array[Dictionary] = []
 
 	# Ver locación
-	if not GameData.locations.has(location_id):
+	if not GameData.has_location(location_id):
 		print("[MissionGen] WARNING: location_id no existe:", location_id)
 		return [
 			{"type": "room_flavor", "text": "Avanzás por un pasillo oscuro."},
@@ -18,7 +18,7 @@ static func build_sequence(location_id: String, length_tag: String = "short") ->
 			{"type": "end"}
 		]
 
-	var loc: Dictionary = GameData.locations[location_id]
+	var loc: Dictionary = GameData.get_location(location_id)
 
 	# Duración objetivo (en segundos de 'pacing', no reloj exacto)
 	var max_time := 0
