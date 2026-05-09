@@ -2,6 +2,7 @@ extends Node
 
 const InventoryServiceScript = preload("res://scripts/services/InventoryService.gd")
 const ShopServiceScript = preload("res://scripts/services/ShopService.gd")
+const CombatFormulaServiceScript = preload("res://scripts/services/CombatFormulaService.gd")
 const DataLoadersScript = preload("res://scripts/data/DataLoaders.gd")
 const DataCatalogScript = preload("res://scripts/data/DataCatalog.gd")
 
@@ -764,105 +765,28 @@ func loot_bag_to_inventory() -> void:
 
 # ========== Combat Helpers (ATK/DEF + DR) ==========
 func _cc_get(key: String, defval: float) -> float:
-	var row: Dictionary = combat_constants.get("global", {})
-	return float(row.get(key, defval))
+	return CombatFormulaServiceScript.cc_get(self, key, defval)
 
 func DR(x: float) -> float:
-	var K_DR: float = _cc_get("K_DR", 50.0)
-	return x / (x + K_DR) if x > 0.0 else 0.0
+	return CombatFormulaServiceScript.damage_reduction(self, x)
 
 func _stats_from_actor(actor: Dictionary) -> Dictionary:
-	return {
-		"LV": int(actor.get("level", 1)),
-		"STR": int(actor.get("str", actor.get("STR", 0))),
-		"DEX": int(actor.get("dex", actor.get("DEX", 0))),
-		"INT": int(actor.get("int", actor.get("INT", 0))),
-	}
+	return CombatFormulaServiceScript.stats_from_actor(actor)
 
 func _equipped_weapon_avg(actor: Dictionary) -> float:
-	var wid := String(actor.get("weapon_id", ""))
-	if wid != "" and weapons.has(wid):
-		var w: Dictionary = weapons.get(wid, {})
-		return (float(w.get("dmg_min", 0)) + float(w.get("dmg_max", 0))) / 2.0
-	return 0.0
+	return CombatFormulaServiceScript.equipped_weapon_avg(self, actor)
 
 func _equipped_armor_def(actor: Dictionary) -> float:
-	var total := 0.0
-
-	# Enemigos u otros actores pueden traer armadura plana directamente
-	if actor.has("armor"):
-		total += float(actor.get("armor", 0))
-
-	# Avatar/equipados: sumar pieza principal
-	var aid := String(actor.get("armor_id", ""))
-	if aid != "" and armors.has(aid):
-		var a: Dictionary = armors.get(aid, {})
-		total += float(a.get("armor", a.get("defense", 0)))
-
-	return total
+	return CombatFormulaServiceScript.equipped_armor_def(self, actor)
 
 func get_primary_secondary_for_action(action_type: String, actor_stats: Dictionary) -> Dictionary:
-	var STR: float = float(actor_stats.get("STR", 0))
-	var DEX: float = float(actor_stats.get("DEX", 0))
-	var INT: float = float(actor_stats.get("INT", 0))
-	var P := 0.0
-	var S := 0.0
-	match action_type:
-		"MELEE":
-			P = STR
-			S = (DEX + INT) / 2.0
-		"RANGED":
-			P = DEX
-			S = (STR + INT) / 2.0
-		"MAGIC":
-			P = INT
-			S = (STR + DEX) / 2.0
-		_:
-			# Fallback: melee
-			P = STR
-			S = (DEX + INT) / 2.0
-	return { "P": P, "S": S }
+	return CombatFormulaServiceScript.get_primary_secondary_for_action(action_type, actor_stats)
 
 func build_offense(actor: Dictionary, P: float, S: float) -> float:
-	var st := _stats_from_actor(actor)
-	var LV: float = float(st["LV"])
-	var atk0: float = _cc_get("atk0", 10.0)
-	var atk_lv: float = _cc_get("atk_lv", 3.0)
-	var mP: float = _cc_get("mP", 0.8)
-	var mS: float = _cc_get("mS", 0.3)
-	var wpn_scale: float = _cc_get("wpn_scale", 1.0)
-	var no_weapon_mult: float = _cc_get("no_weapon_mult", 0.6)
-	var improv_scale: float = _cc_get("improv_scale", 0.1)
-
-	var ATK_base := atk0 + atk_lv * LV
-	var DR_P := DR(P)
-	var DR_S := DR(S)
-	var stat_mult := 1.0 + mP * DR_P + mS * DR_S
-
-	var WPN_avg := _equipped_weapon_avg(actor)
-	if WPN_avg > 0.0:
-		var core_offense := ATK_base + wpn_scale * WPN_avg
-		return max(1.0, core_offense * stat_mult)
-	else:
-		var improv := improv_scale * P
-		var core_offense_noW := (ATK_base + improv) * no_weapon_mult
-		return max(1.0, core_offense_noW * stat_mult)
+	return CombatFormulaServiceScript.build_offense(self, actor, P, S)
 
 func build_defense(actor: Dictionary) -> float:
-	var st := _stats_from_actor(actor)
-	var LV: float = float(st["LV"])
-	var STR: float = float(st["STR"])
-	var INT: float = float(st["INT"])
-	var def0: float = _cc_get("def0", 8.0)
-	var def_lv: float = _cc_get("def_lv", 2.5)
-	var dSTR: float = _cc_get("dSTR", 20.0)
-	var dINT: float = _cc_get("dINT", 20.0)
-
-	var DEF_base := def0 + def_lv * LV
-	var ARM_def := _equipped_armor_def(actor)
-	var DEF_stat := dSTR * DR(STR) + dINT * DR(INT)
-	var core_def := DEF_base + ARM_def + DEF_stat
-	return max(0.0, core_def)
+	return CombatFormulaServiceScript.build_defense(self, actor)
 # ===================================================
 
 func _load_combat_constants(path: String) -> void:
