@@ -17,3 +17,5 @@ El loader de `enemies.csv` tambien se movio a `DataLoaders.gd`, incluyendo sopor
 Los loaders de `locations.csv`, `loot_tables.csv` y `texts.csv` tambien viven en `DataLoaders.gd`. Esto separa buena parte del contenido de mundo y narrativa de `GameData.gd`.
 
 Los CSV de tiendas (`shop_blacksmith.csv`, `shop_healer.csv`, `shop_tavern.csv`) tambien se cargan desde `DataLoaders.gd`, manteniendo `stock` y `price_override`.
+
+`scripts/data/DataCatalog.gd` agrupa que archivos componen el contenido actual del juego. `GameData.gd` ya no necesita conocer cada ruta CSV en `load_all()`; pide el catalogo completo y asigna los diccionarios resultantes.

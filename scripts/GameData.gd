@@ -3,6 +3,7 @@ extends Node
 const InventoryServiceScript = preload("res://scripts/services/InventoryService.gd")
 const ShopServiceScript = preload("res://scripts/services/ShopService.gd")
 const DataLoadersScript = preload("res://scripts/data/DataLoaders.gd")
+const DataCatalogScript = preload("res://scripts/data/DataCatalog.gd")
 
 # --- Diccionarios globales (por id) ---
 var enemies: Dictionary = {}			# id: {name, hp_min, hp_max, ...}
@@ -146,17 +147,16 @@ func reset() -> void:
 
 func load_all() -> void:
 	reset()
-	_load_enemies("res://data/enemies.csv")
-	_load_weapons("res://data/weapons.csv")
-	_load_armors("res://data/armors.csv")
-	_load_items("res://data/items.csv")
-	_load_locations("res://data/locations.csv")
-	_load_loot_tables("res://data/loot_tables.csv")
-	_load_texts("res://data/texts.csv")
-	_load_combat_constants("res://data/combat_constants.csv")
-	_load_shop("blacksmith", "res://data/shop_blacksmith.csv")
-	_load_shop("healer",     "res://data/shop_healer.csv")
-	_load_shop("tavern",     "res://data/shop_tavern.csv")
+	var catalog := DataCatalogScript.load_all()
+	enemies = catalog.get("enemies", {})
+	weapons = catalog.get("weapons", {})
+	armors = catalog.get("armors", {})
+	items = catalog.get("items", {})
+	locations = catalog.get("locations", {})
+	loot_tables = catalog.get("loot_tables", {})
+	texts = catalog.get("texts", {})
+	combat_constants = catalog.get("combat_constants", {})
+	shops = catalog.get("shops", {})
 
 # --- Tiendas / Economía ---
 var shops: Dictionary = {
