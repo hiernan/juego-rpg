@@ -51,7 +51,7 @@ func _refresh_inventory_list() -> void:
 		return
 	list_inv.clear()
 
-	var inv: Array = GameData.avatar.get("inventory", [])
+	var inv: Array = GameData.get_container_items("inventory")
 	for v in inv:
 		var id: String = String(v)
 		# Mostrar SOLO armas y armaduras (no stackean)
@@ -67,7 +67,7 @@ func _refresh_inventory_list() -> void:
 
 func _refresh_gold() -> void:
 	if lbl_gold:
-		lbl_gold.text = "Oro: %d" % int(GameData.avatar.get("gold", 0))
+		lbl_gold.text = "Oro: %d" % GameData.get_gold()
 
 # --------- Handlers DnD ---------
 # Comprar 1 (tienda → inventario)

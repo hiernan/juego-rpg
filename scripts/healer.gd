@@ -66,7 +66,7 @@ func _refresh_inventory_list() -> void:
 
 	# Solo mostrar curativas (subkind=heal) que estén en el inventario
 	var counts := {}
-	var inv: Array = GameData.avatar.get("inventory", [])
+	var inv: Array = GameData.get_container_items("inventory")
 	for v in inv:
 		var id := String(v)
 		var row: Dictionary = GameData.items.get(id, {})
@@ -88,7 +88,7 @@ func _refresh_inventory_list() -> void:
 
 func _refresh_gold() -> void:
 	if lbl_gold:
-		lbl_gold.text = "Oro: %d" % int(GameData.avatar.get("gold", 0))
+		lbl_gold.text = "Oro: %d" % GameData.get_gold()
 
 # ---------- Botones ----------
 func _on_close_pressed() -> void:
@@ -97,22 +97,20 @@ func _on_close_pressed() -> void:
 func _on_heal_pressed() -> void:
 	# costo simple (luego lo sacamos a CSV si querés)
 	var COST := 10
-	var av := GameData.avatar
-	var gold := int(av.get("gold", 0))
-	var hp := int(av.get("hp", 0))
-	var max_hp := int(av.get("max_hp", av.get("hp_max", 0)))
+	var hp := int(GameData.avatar.get("hp", 0))
+	var max_hp := int(GameData.avatar.get("max_hp", GameData.avatar.get("hp_max", 0)))
 
 	if max_hp <= 0:
 		return
 	if hp >= max_hp:
 		print("[HEALER] Ya estás al máximo.")
 		return
-	if gold < COST:
+	if not GameData.can_afford(COST):
 		print("[HEALER] Te falta oro. Necesitás %d." % COST)
 		return
 
-	av["gold"] = gold - COST
-	av["hp"] = max_hp
+	GameData.pay_gold(COST)
+	GameData.heal(max_hp)
 	print("[HEALER] Curado por %d oro → HP %d/%d" % [COST, max_hp, max_hp])
 
 	_refresh_gold()

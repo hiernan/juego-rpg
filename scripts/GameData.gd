@@ -315,6 +315,18 @@ func get_equipped_id(slot_kind: String) -> String:
 func count_in_container(container: String, id: String) -> int:
 	return InventoryServiceScript.count_in_container(self, container, id)
 
+func get_container_items(container: String) -> Array:
+	var ref: Variant = _get_container_ref(container)
+	if typeof(ref) == TYPE_ARRAY:
+		return (ref as Array).duplicate()
+	return []
+
+func get_gold() -> int:
+	return int(avatar.get("gold", 0))
+
+func add_xp(amount: int) -> void:
+	avatar["xp"] = int(avatar.get("xp", 0)) + max(0, amount)
+
 func loot_bag_reset() -> void:
 	LootBagServiceScript.reset(self)
 

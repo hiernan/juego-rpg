@@ -341,7 +341,7 @@ func _finish_death() -> void:
 
 	# Conservar la XP ganada en la misión (aunque se pierda la bolsa/oro)
 	var gained_xp: int = int(run_rewards.get("xp", 0))
-	GameData.avatar["xp"] = int(GameData.avatar.get("xp", 0)) + gained_xp
+	GameData.add_xp(gained_xp)
 
 	_show_result_overlay("Tu avatar murió", true)  # lost = true
 
@@ -449,12 +449,8 @@ func _show_result_overlay(title: String, lost: bool) -> void:
 		overlay.visible = true
 
 func _apply_rewards_to_avatar() -> void:
-	GameData.avatar["gold"] = int(GameData.avatar["gold"]) + int(run_rewards["gold"])
-	GameData.avatar["xp"] = int(GameData.avatar["xp"]) + int(run_rewards["xp"])
-	var inv: Array = GameData.avatar["inventory"]
-	for id in run_rewards["items"]:
-		inv.append(id)
-	GameData.avatar["inventory"] = inv
+	GameData.add_gold(int(run_rewards["gold"]))
+	GameData.add_xp(int(run_rewards["xp"]))
 
 func _join_lines(arr: Array) -> String:
 	var out := ""
@@ -489,7 +485,7 @@ func _apply_marker(d: Dictionary) -> void:
 		"consume":
 			# curar avatar y remover ítem de inventario de la run (prioridad run)
 			var heal := int(ap.get("heal", 0))
-			GameData.avatar["hp"] = min(int(GameData.avatar["max_hp"]), int(GameData.avatar["hp"]) + heal)
+			GameData.heal(heal)
 			var id := String(ap.get("item_id", ""))
 			# sacar primero de run_rewards.items si existe
 			var arr: Array = run_rewards["items"]
@@ -499,11 +495,7 @@ func _apply_marker(d: Dictionary) -> void:
 				run_rewards["items"] = arr
 			else:
 				# si no está en run, intentar del inventario del avatar
-				var inv: Array = GameData.avatar.get("inventory", [])
-				var idx2 := inv.find(id)
-				if idx2 >= 0:
-					inv.remove_at(idx2)
-					GameData.avatar["inventory"] = inv
+				GameData.take_item("inventory", id, 1)
 			_refresh_loot_ui()
 
 func _auto_potion_if_needed() -> void:
@@ -519,7 +511,7 @@ func _auto_potion_if_needed() -> void:
 			has = true
 			break
 	if not has:
-		for id2 in (GameData.avatar.get("inventory", []) as Array):
+		for id2 in GameData.get_container_items("inventory"):
 			if id2 == "potion_small":
 				has = true
 				break
