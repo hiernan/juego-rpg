@@ -4,6 +4,8 @@ var mission_time_scale: float = 2.0	# 1.0 normal, 2.0 el doble, 0.5 más lento
 const MissionGen = preload("res://scripts/MissionGen.gd")
 const Combat = preload("res://scripts/Combat.gd")
 const MissionRunnerServiceScript = preload("res://scripts/services/MissionRunnerService.gd")
+const MissionRewardServiceScript = preload("res://scripts/services/MissionRewardService.gd")
+const MissionLogFormatterScript = preload("res://scripts/presentation/MissionLogFormatter.gd")
 
 # UI base
 @onready var label_titulo: Label = %LabelTitulo
@@ -21,11 +23,7 @@ const MissionRunnerServiceScript = preload("res://scripts/services/MissionRunner
 @onready var overlay_title: Label = %ResultTitle
 @onready var overlay_summary: RichTextLabel = %ResultSummary
 
-var run_rewards := {
-	"gold": 0,
-	"xp": 0,
-	"items": []			# Array[String] de item_id
-}
+var run_rewards := MissionRewardServiceScript.empty_rewards()
 
 var events: Array[Dictionary] = []        # cola de eventos de la misión
 var waiting_dots := false
@@ -292,86 +290,30 @@ func _on_button_volver_pressed() -> void:
 	get_tree().change_scene_to_file("res://Town.tscn")
 
 func _reward_add_gold(n: int) -> void:
-	run_rewards["gold"] = int(run_rewards["gold"]) + max(0, n)
+	MissionRewardServiceScript.add_gold(run_rewards, n)
 	_refresh_loot_ui()
 
 func _reward_add_xp(n: int) -> void:
-	run_rewards["xp"] = int(run_rewards["xp"]) + max(0, n)
+	MissionRewardServiceScript.add_xp(run_rewards, n)
 	_refresh_loot_ui()
 
 func _reward_add_item(item_id: String) -> void:
-	var arr: Array = run_rewards["items"]
-	arr.append(item_id)
-	run_rewards["items"] = arr
-
-	# Bolsa = inventario activo en misión
-	GameData.loot_bag_add(item_id)
-
+	MissionRewardServiceScript.add_item(GameData, run_rewards, item_id)
 	_refresh_loot_ui()
 
 func _reward_clear() -> void:
-	run_rewards = {"gold": 0, "xp": 0, "items": []}
+	run_rewards = MissionRewardServiceScript.empty_rewards()
 	_refresh_loot_ui()
 
 func _refresh_loot_ui() -> void:
 	if loot_log == null:
 		return
-	var lines: Array = []
-	lines.append("[b]Oro:[/b] %d" % int(run_rewards["gold"]))
-	lines.append("[b]XP:[/b] %d" % int(run_rewards["xp"]))
-	lines.append("[b]Bolsa:[/b]")
-
-	# Contar por id dentro de la Bolsa
-	var counts: Dictionary = {}
-	for x in GameData.loot_bag:
-		var iid: String = String(x)
-		counts[iid] = int(counts.get(iid, 0)) + 1
-
-	# Mostrar "Nombre (xN)" usando el helper central si existe
-	for iid in counts.keys():
-		var name: String = ""
-		if GameData.has_method("get_item_display_name"):
-			name = GameData.get_item_display_name(iid)
-		else:
-			name = iid
-		var n: int = int(counts[iid])
-		var label: String = name if n <= 1 else "%s (x%d)" % [name, n]
-		lines.append(" • " + label)
-
 	loot_log.clear()
-	loot_log.append_text(_join_lines(lines))
+	loot_log.append_text(MissionLogFormatterScript.format_loot_log(GameData, run_rewards))
 
 func _pick_avatar_ouch() -> String:
 	var quips: Array = ["¡Eh! Eso dolió.", "¡Auch!", "¡Ojo!", "¡Uff!", "¡Ay!"]
 	return String(quips[randi() % quips.size()])
-
-func _compose_summary_text(lost: bool) -> String:
-	var sb: Array = []
-	if lost:
-		sb.append("Perdiste todo el botín de esta misión.")
-	else:
-		sb.append("Botín obtenido:")
-		sb.append(" • Oro: %d" % int(run_rewards["gold"]))
-		sb.append(" • XP: %d" % int(run_rewards["xp"]))
-		# Mostrar TODA la bolsa del run (snapshot), agrupada. Fallback: run_rewards["items"]
-		var bag: Array = _result_bag if _result_bag.size() > 0 else Array(run_rewards.get("items", []))
-
-		# Contar por id
-		var counts := {}
-		for x in bag:
-			var iid: String = String(x)
-			counts[iid] = int(counts.get(iid, 0)) + 1
-
-		if counts.size() == 0:
-			sb.append(" • Objetos: (ninguno)")
-		else:
-			sb.append(" • Objetos:")
-			for iid in counts.keys():
-				var nice := GameData.get_item_display_name(iid)
-				var n: int = int(counts[iid])
-				var line := "    - %s" % nice if n <= 1 else "    - %s (x%d)" % [nice, n]
-				sb.append(line)
-	return _join_lines(sb)
 
 func _show_result_overlay(title: String, lost: bool) -> void:
 	timer_tick.stop()
@@ -379,23 +321,13 @@ func _show_result_overlay(title: String, lost: bool) -> void:
 	if overlay:
 		overlay_title.text = title
 		overlay_summary.clear()
-		overlay_summary.append_text(_compose_summary_text(lost))
+		overlay_summary.append_text(
+			MissionLogFormatterScript.format_result_summary(GameData, run_rewards, _result_bag, lost)
+		)
 		overlay.visible = true
 
 func _apply_rewards_to_avatar() -> void:
-	GameData.add_gold(int(run_rewards["gold"]))
-	GameData.add_xp(int(run_rewards["xp"]))
-
-func _join_lines(arr: Array) -> String:
-	var out := ""
-	var first := true
-	for v in arr:
-		if first:
-			out += String(v)
-			first = false
-		else:
-			out += "\n" + String(v)
-	return out
+	MissionRewardServiceScript.apply_to_avatar(GameData, run_rewards)
 # Encolá un efecto para aplicar tras mostrar su línea asociada
 func _enqueue_apply_reward(gold: int, xp: int, items: Array) -> void:
 	line_queue.append({"apply": {"type": "reward", "gold": gold, "xp": xp, "items": items}})
@@ -419,17 +351,8 @@ func _apply_marker(d: Dictionary) -> void:
 		"consume":
 			# curar avatar y remover ítem de inventario de la run (prioridad run)
 			var heal := int(ap.get("heal", 0))
-			GameData.heal(heal)
 			var id := String(ap.get("item_id", ""))
-			# sacar primero de run_rewards.items si existe
-			var arr: Array = run_rewards["items"]
-			var idx := arr.find(id)
-			if idx >= 0:
-				arr.remove_at(idx)
-				run_rewards["items"] = arr
-			else:
-				# si no está en run, intentar del inventario del avatar
-				GameData.take_item("inventory", id, 1)
+			MissionRewardServiceScript.consume_item(GameData, run_rewards, id, heal)
 			_refresh_loot_ui()
 
 func _combat_round() -> void:
@@ -540,26 +463,3 @@ func _combat_round() -> void:
 
 func _exit_tree() -> void:
 	Engine.time_scale = 1.0
-
-func _compose_items_block() -> String:
-	# Usa la bolsa del run (_result_bag). Si está vacía, cae a run_rewards["items"].
-	var bag: Array = _result_bag if _result_bag.size() > 0 else Array(run_rewards.get("items", []))
-
-	# Contar por id
-	var counts := {}
-	for x in bag:
-		var iid: String = String(x)
-		counts[iid] = int(counts.get(iid, 0)) + 1
-
-	var lines: Array = []
-	if counts.size() == 0:
-		lines.append("[b]Objetos:[/b] — (ninguno)")
-	else:
-		lines.append("[b]Objetos:[/b]")
-		for iid in counts.keys():
-			var nice := GameData.get_item_display_name(iid)
-			var n: int = int(counts[iid])
-			var label := " • %s" % nice if n <= 1 else " • %s (x%d)" % [nice, n]
-			lines.append(label)
-
-	return _join_lines(lines)  # usa tu helper existente que junta líneas
