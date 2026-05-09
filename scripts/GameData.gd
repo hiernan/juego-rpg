@@ -4,6 +4,7 @@ const InventoryServiceScript = preload("res://scripts/services/InventoryService.
 const ShopServiceScript = preload("res://scripts/services/ShopService.gd")
 const CombatFormulaServiceScript = preload("res://scripts/services/CombatFormulaService.gd")
 const LootBagServiceScript = preload("res://scripts/services/LootBagService.gd")
+const ItemCatalogServiceScript = preload("res://scripts/services/ItemCatalogService.gd")
 const DataLoadersScript = preload("res://scripts/data/DataLoaders.gd")
 const DataCatalogScript = preload("res://scripts/data/DataCatalog.gd")
 
@@ -193,20 +194,7 @@ func _load_armors(path: String) -> void:
 	armors = DataLoadersScript.load_armors(path)
 
 func get_item_by_id(id: String) -> Dictionary:
-	# Usa el kind si existe para buscar en la tabla correcta
-	var kind: String = get_kind_for_id(id)
-	if kind == "weapon" and weapons.has(id):
-		return weapons[id]
-	if kind == "armor" and armors.has(id):
-		return armors[id]
-
-	# Fallbacks por si el kind aún no está seteado o no coincide
-	if weapons.has(id):
-		return weapons[id]
-	if armors.has(id):
-		return armors[id]
-
-	return {}
+	return ItemCatalogServiceScript.get_item_by_id(self, id)
 
 func _load_locations(path: String) -> void:
 	locations = DataLoadersScript.load_locations(path)
@@ -326,34 +314,14 @@ func _remove_from_array_or_dict(ref: Variant, id: String, qty: int) -> bool:
 
 # Devuelve el diccionario de un arma por id (o {} si no existe).
 func get_weapon(id: String) -> Dictionary:
-	if weapons.has(id):
-		var w: Dictionary = weapons[id]
-		var out: Dictionary = w.duplicate()
-		out["id"] = id
-		out["kind"] = "weapon"
-		return out
-	return {}
+	return ItemCatalogServiceScript.get_weapon(self, id)
 
 # (Opcional, por paridad con armas; no rompe nada dejarla.)
 func get_armor(id: String) -> Dictionary:
-	if armors.has(id):
-		var a: Dictionary = armors[id]
-		var out: Dictionary = a.duplicate()
-		out["id"] = id
-		out["kind"] = "armor"
-		return out
-	return {}
+	return ItemCatalogServiceScript.get_armor(self, id)
 
 func get_item_name_by_id(id: String) -> String:
-	if id == "":
-		return ""
-	if weapons.has(id):
-		var w: Dictionary = weapons[id]
-		return String(w.get("name", id))
-	if armors.has(id):
-		var a: Dictionary = armors[id]
-		return String(a.get("name", id))
-	return id
+	return ItemCatalogServiceScript.get_item_name_by_id(self, id)
 
 func add_item_to_inventory(id: String, qty: int = 1) -> void:
 	for i in range(qty):
@@ -393,37 +361,7 @@ func remove_item_from_source(id: String, from_src: String, qty: int = 1) -> void
 			pass
 
 func get_item_tooltip(id: String) -> String:
-	# Fuente única de la verdad para tooltips
-	if id == "":
-		return "¿Desconocido?\n(id vacío)"
-	var kind: String = get_item_kind(id)
-	if kind == "":
-		# id no reconocido en catálogos
-		print("[DATA] WARN get_item_tooltip: id desconocido=", id)
-		return "¿Desconocido?\n(id: %s)" % id
-
-	# Nombre "lindo"
-	var name: String = ""
-	if has_method("get_item_display_name"):
-		name = get_item_display_name(id)
-	else:
-		name = id
-
-	match kind:
-		"weapon":
-			var w: Dictionary = weapons.get(id, {})
-			var dmin: int = int(w.get("dmg_min", 1))
-			var dmax: int = int(w.get("dmg_max", 2))
-			var spd: float = float(w.get("speed", w.get("atk_speed", 1.0)))
-			return "%s\nDaño: %d–%d\nVelocidad: %.2f" % [name, dmin, dmax, spd]
-		"armor":
-			var a: Dictionary = armors.get(id, {})
-			var arm: int = int(a.get("armor", a.get("defense", 0)))
-			return "%s\nDefensa: %d" % [name, arm]
-		_:
-			# Futuro: consumibles/llaves/etc.
-			return "%s" % name
-
+	return ItemCatalogServiceScript.get_item_tooltip(self, id)
 
 # ===== Helpers genéricos de contenedores (arrays de ids) =====
 
@@ -450,11 +388,7 @@ const CONTAINERS := {
 
 # Devuelve "weapon", "armor" o "item" (lo que ya usás).
 func get_item_kind(id: String) -> String:
-	if weapons.has(id):
-		return "weapon"
-	if armors.has(id):
-		return "armor"
-	return "item"
+	return ItemCatalogServiceScript.get_item_kind(self, id)
 
 func move_item_between_containers(from: String, to: String, id: String, amount: int) -> bool:
 	return InventoryServiceScript.move_item_between_containers(self, from, to, id, amount)
@@ -583,18 +517,7 @@ func _load_items(path: String) -> void:
 
 # Nombre de display unificado para cualquier id (items/weapons/armors)
 func get_item_display_name(id: String) -> String:
-	var items_dict = self.get("items")
-	if typeof(items_dict) == TYPE_DICTIONARY:
-		var row = items_dict.get(id, {})
-		if typeof(row) == TYPE_DICTIONARY:
-			var nm = String(row.get("name", ""))
-			if nm != "":
-				return nm
-	if weapons.has(id):
-		return String(weapons[id].get("name", id))
-	if armors.has(id):
-		return String(armors[id].get("name", id))
-	return id
+	return ItemCatalogServiceScript.get_item_display_name(self, id)
 
 func loot_bag_to_inventory() -> void:
 	LootBagServiceScript.bag_to_inventory(self)
