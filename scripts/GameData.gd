@@ -259,68 +259,13 @@ func get_item_by_id(id: String) -> Dictionary:
 	return {}
 
 func _load_locations(path: String) -> void:
-	# NOTA: si tu CSV menciona 'rat' en monster_ids y no existe en enemies.csv,
-	# no pasa nada por ahora (lo validamos más adelante si querés).
-	var data := _read_csv(path)
-	if data.is_empty(): return
-	var headers: PackedStringArray = data[0]
-	var rows: Array = data[1]
-	var col: Dictionary = {}
-	for i in range(headers.size()):
-		col[headers[i]] = i
-
-	for r in rows:
-		var row: PackedStringArray = r
-		var id: String = (row[col["id"]] as String)
-		var item := {
-			"name": row[col["name"]],
-			"flavor_ids": _to_list(row[col["flavor_ids"]]),
-			"monster_ids": _to_list(row[col["monster_ids"]]),
-			"loot_table_id": row[col["loot_table_id"]],
-			"danger_level": _to_int(row[col["danger_level"]])
-		}
-		locations[id] = item
+	locations = DataLoadersScript.load_locations(path)
 
 func _load_loot_tables(path: String) -> void:
-	var data := _read_csv(path)
-	if data.is_empty(): return
-	var headers: PackedStringArray = data[0]
-	var rows: Array = data[1]
-	var col: Dictionary = {}
-	for i in range(headers.size()):
-		col[headers[i]] = i
-
-	# Reiniciar por si recargamos
-	loot_tables.clear()
-
-	for r in rows:
-		var row: PackedStringArray = r
-		var table_id: String = (row[col["id"]] as String)
-		var item_id: String = (row[col["item_id"]] as String)
-		var weight: int = _to_int(row[col["weight"]])
-
-		if not loot_tables.has(table_id):
-			loot_tables[table_id] = []
-		var arr: Array = loot_tables[table_id]
-		arr.append({"item_id": item_id, "weight": weight})
-		loot_tables[table_id] = arr
+	loot_tables = DataLoadersScript.load_loot_tables(path)
 
 func _load_texts(path: String) -> void:
-	var data := _read_csv(path)
-	if data.is_empty(): return
-	var headers: PackedStringArray = data[0]
-	var rows: Array = data[1]
-	var col: Dictionary = {}
-	for i in range(headers.size()):
-		col[headers[i]] = i
-
-	for r in rows:
-		var row: PackedStringArray = r
-		var id: String = (row[col["id"]] as String)
-		var item := {
-			"text_es": row[col["text_es"]]
-		}
-		texts[id] = item
+	texts = DataLoadersScript.load_texts(path)
 
 # --- Equipment API mínima ---
 #func get_equipped_weapon_id() -> String:

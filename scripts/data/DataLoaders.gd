@@ -107,6 +107,76 @@ static func load_enemies(path: String) -> Dictionary:
 	return result
 
 
+static func load_locations(path: String) -> Dictionary:
+	var result: Dictionary = {}
+	var data := CsvLoaderScript.read_csv(path)
+	if data.is_empty():
+		return result
+
+	var headers: PackedStringArray = data[0]
+	var idx := _header_index(headers)
+	for r in data[1]:
+		var row: PackedStringArray = r
+		var id := _get_col(row, idx, "id")
+		if id == "":
+			continue
+
+		result[id] = {
+			"name": _get_col(row, idx, "name"),
+			"flavor_ids": CsvLoaderScript.to_list(_get_col(row, idx, "flavor_ids")),
+			"monster_ids": CsvLoaderScript.to_list(_get_col(row, idx, "monster_ids")),
+			"loot_table_id": _get_col(row, idx, "loot_table_id"),
+			"danger_level": _to_int_default(_get_col(row, idx, "danger_level")),
+		}
+	return result
+
+
+static func load_loot_tables(path: String) -> Dictionary:
+	var result: Dictionary = {}
+	var data := CsvLoaderScript.read_csv(path)
+	if data.is_empty():
+		return result
+
+	var headers: PackedStringArray = data[0]
+	var idx := _header_index(headers)
+	for r in data[1]:
+		var row: PackedStringArray = r
+		var table_id := _get_col(row, idx, "id")
+		var item_id := _get_col(row, idx, "item_id")
+		if table_id == "":
+			continue
+
+		if not result.has(table_id):
+			result[table_id] = []
+		var entries: Array = result[table_id]
+		entries.append({
+			"item_id": item_id,
+			"weight": _to_int_default(_get_col(row, idx, "weight")),
+		})
+		result[table_id] = entries
+	return result
+
+
+static func load_texts(path: String) -> Dictionary:
+	var result: Dictionary = {}
+	var data := CsvLoaderScript.read_csv(path)
+	if data.is_empty():
+		return result
+
+	var headers: PackedStringArray = data[0]
+	var idx := _header_index(headers)
+	for r in data[1]:
+		var row: PackedStringArray = r
+		var id := _get_col(row, idx, "id")
+		if id == "":
+			continue
+
+		result[id] = {
+			"text_es": _get_col(row, idx, "text_es"),
+		}
+	return result
+
+
 static func load_armors(path: String) -> Dictionary:
 	var result: Dictionary = {}
 	var data := CsvLoaderScript.read_csv(path)

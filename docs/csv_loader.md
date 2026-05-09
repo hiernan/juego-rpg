@@ -13,3 +13,5 @@ El loader de `items.csv` tambien vive en `DataLoaders.gd`. Conserva el contrato 
 Los loaders de `weapons.csv` y `armors.csv` tambien fueron movidos a `DataLoaders.gd`. `GameData.gd` mantiene `_load_weapons()` y `_load_armors()` solo como fachada de compatibilidad.
 
 El loader de `enemies.csv` tambien se movio a `DataLoaders.gd`, incluyendo soporte para la columna opcional `armor`.
+
+Los loaders de `locations.csv`, `loot_tables.csv` y `texts.csv` tambien viven en `DataLoaders.gd`. Esto separa buena parte del contenido de mundo y narrativa de `GameData.gd`.
