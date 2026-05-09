@@ -3,6 +3,7 @@ extends Node
 const InventoryServiceScript = preload("res://scripts/services/InventoryService.gd")
 const ShopServiceScript = preload("res://scripts/services/ShopService.gd")
 const CsvLoaderScript = preload("res://scripts/data/CsvLoader.gd")
+const DataLoadersScript = preload("res://scripts/data/DataLoaders.gd")
 
 # --- Diccionarios globales (por id) ---
 var enemies: Dictionary = {}			# id: {name, hp_min, hp_max, ...}
@@ -1126,31 +1127,4 @@ func build_defense(actor: Dictionary) -> float:
 
 func _load_combat_constants(path: String) -> void:
 	combat_constants.clear()
-	var f := FileAccess.open(path, FileAccess.READ)
-	if f == null:
-		print("[CONST] ERROR: no se pudo abrir:", path)
-		return
-
-	var header: PackedStringArray = f.get_csv_line()
-	if header.is_empty():
-		print("[CONST] WARN: CSV vacío:", path)
-		return
-
-	while not f.eof_reached():
-		var row: PackedStringArray = f.get_csv_line()
-		if row.is_empty():
-			continue
-		var id := String(row[0]).strip_edges()
-		if id == "":
-			continue
-		var d: Dictionary = {}
-		for i in range(1, header.size()):
-			if i >= row.size():
-				continue
-			var key := String(header[i]).strip_edges()
-			var val := String(row[i]).strip_edges()
-			d[key] = val	# lo guardamos como String; _cc_get() lo castea a float
-		combat_constants[id] = d
-
-	var g: Dictionary = combat_constants.get("global", {})
-	print("[CONST] loaded:", path, " keys(global)=", g.keys())
+	combat_constants = DataLoadersScript.load_combat_constants(path)
