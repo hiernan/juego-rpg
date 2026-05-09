@@ -9,12 +9,16 @@ class_name MissionEvents
 # 🪙 Depósito / búsqueda
 static func event_deposito(loc: Dictionary) -> Array[Dictionary]:
 	var seq: Array[Dictionary] = []
+	var flavor_text := GameData.pick_text(
+		loc.get("flavor_ids", []),
+		"Llegás a lo que parece ser un depósito polvoriento."
+	)
 
 	# En vez de poner el room_flavor acá, pasamos la descripción al evento search_room.
 	seq.append({
 		"type": "search_room",
 		"loot_table_id": String(loc.get("loot_table_id", "")),
-		"desc": "Llegás a lo que parece ser un depósito polvoriento."
+		"desc": flavor_text
 	})
 
 	# 20% chance de enemigo sorpresa
@@ -31,9 +35,13 @@ static func event_deposito(loc: Dictionary) -> Array[Dictionary]:
 # 🚶 Pasillo vacío
 static func event_pasillo(loc: Dictionary) -> Array[Dictionary]:
 	var seq: Array[Dictionary] = []
+	var flavor_text := GameData.pick_text(
+		loc.get("flavor_ids", []),
+		"Avanzás por un pasillo oscuro y silencioso."
+	)
 
 	# Narración inicial
-	seq.append({"type": "room_flavor", "text": "Avanzás por un pasillo oscuro y silencioso."})
+	seq.append({"type": "room_flavor", "text": flavor_text})
 
 	# 15% chance de trampa
 	if randf() < 0.15:
@@ -45,9 +53,13 @@ static func event_pasillo(loc: Dictionary) -> Array[Dictionary]:
 # ⚔️ Encuentro enemigo
 static func event_enemigo(loc: Dictionary) -> Array[Dictionary]:
 	var seq: Array[Dictionary] = []
+	var flavor_text := GameData.pick_text(
+		loc.get("flavor_ids", []),
+		"De repente, algo se mueve entre las sombras."
+	)
 
 	# Narración inicial
-	seq.append({"type": "room_flavor", "text": "De repente, algo se mueve entre las sombras."})
+	seq.append({"type": "room_flavor", "text": flavor_text})
 
 	# Elegir 1 enemigo de la locación
 	var monster_ids: Array = loc.get("monster_ids", [])

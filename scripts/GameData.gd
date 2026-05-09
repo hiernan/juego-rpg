@@ -185,6 +185,19 @@ func get_data_counts() -> Dictionary:
 		"texts": texts.size(),
 	}
 
+func get_text(id: String, fallback: String = "") -> String:
+	if id == "":
+		return fallback
+	var row: Dictionary = texts.get(id, {})
+	var text_value := String(row.get("text_es", ""))
+	return text_value if text_value != "" else fallback
+
+func pick_text(ids: Array, fallback: String = "") -> String:
+	if ids.is_empty():
+		return fallback
+	var text_id := String(pick_random(ids))
+	return get_text(text_id, fallback)
+
 func _load_locations(path: String) -> void:
 	locations = DataLoadersScript.load_locations(path)
 

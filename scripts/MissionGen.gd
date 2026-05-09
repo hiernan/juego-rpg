@@ -32,7 +32,8 @@ static func build_sequence(location_id: String, length_tag: String = "short") ->
 
 	# Intro (una sola vez)
 	var loc_name: String = String(loc.get("name", "el lugar…"))
-	seq.append({"type": "room_flavor", "text": "Te internás en " + loc_name})
+	var intro_text := GameData.pick_text(loc.get("flavor_ids", []), "Te internás en " + loc_name)
+	seq.append({"type": "room_flavor", "text": intro_text})
 
 	# Pool de eventos
 	var event_pool: Array = loc.get("event_ids", [])
