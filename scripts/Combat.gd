@@ -16,7 +16,7 @@ static func _ccf(key: String, def: float) -> float:
 
 # Nivel “oculto” del avatar (por ahora 1; ajusta si ya lo guardás en GameData.avatar.level)
 static func get_avatar_level() -> int:
-	return int(GameData.avatar.get("level", 1))
+	return GameData.get_level()
 
 # Nivel “oculto” del enemigo (si no está en CSV, 1)
 static func get_enemy_level(def: Dictionary) -> int:

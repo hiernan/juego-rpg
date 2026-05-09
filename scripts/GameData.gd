@@ -55,6 +55,18 @@ func get_weapon_damage_range() -> Vector2i:
 func get_armor_value() -> int:
 	return AvatarServiceScript.get_armor_value(self)
 
+func get_hp() -> int:
+	return int(avatar.get("hp", 0))
+
+func get_max_hp() -> int:
+	return int(avatar.get("max_hp", avatar.get("hp_max", 0)))
+
+func get_level() -> int:
+	return int(avatar.get("level", 1))
+
+func get_avatar_state() -> Dictionary:
+	return avatar.duplicate(true)
+
 func apply_damage(amount: int) -> void:
 	AvatarServiceScript.apply_damage(self, amount)
 

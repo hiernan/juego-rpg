@@ -97,8 +97,8 @@ func _on_close_pressed() -> void:
 func _on_heal_pressed() -> void:
 	# costo simple (luego lo sacamos a CSV si querés)
 	var COST := 10
-	var hp := int(GameData.avatar.get("hp", 0))
-	var max_hp := int(GameData.avatar.get("max_hp", GameData.avatar.get("hp_max", 0)))
+	var hp := GameData.get_hp()
+	var max_hp := GameData.get_max_hp()
 
 	if max_hp <= 0:
 		return

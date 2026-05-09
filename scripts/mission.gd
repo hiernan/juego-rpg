@@ -1,10 +1,6 @@
 extends Control
 
 var mission_time_scale: float = 2.0	# 1.0 normal, 2.0 el doble, 0.5 más lento
-var auto_potion_threshold: float = 0.25	# 25%
-var auto_potion_item_id: String = "potion_small"
-var _auto_potion_suppressed_until_safe: bool = false
-	
 const MissionGen = preload("res://scripts/MissionGen.gd")
 const Combat = preload("res://scripts/Combat.gd")
 
@@ -499,8 +495,8 @@ func _apply_marker(d: Dictionary) -> void:
 			_refresh_loot_ui()
 
 func _auto_potion_if_needed() -> void:
-	var hp := int(GameData.avatar.get("hp", 1))
-	var hp_max := int(GameData.avatar.get("hp_max", 1))
+	var hp := GameData.get_hp()
+	var hp_max := GameData.get_max_hp()
 	if hp_max <= 0: return
 	if float(hp) / float(hp_max) > 0.25: return
 
@@ -535,7 +531,7 @@ func _combat_round() -> void:
 
 	if Combat.roll_hit(e_lvl, a_lvl, 0.0, 0.0):
 		# Daño con ATK/DEF + flags (block/graze/crit)
-		var res_e := Combat.compute_enemy_hit_detail(current_enemy, GameData.avatar)
+		var res_e := Combat.compute_enemy_hit_detail(current_enemy, GameData.get_avatar_state())
 		var dmg_e: int = int(res_e["dmg"])
 		var flags_e: Dictionary = res_e["flags"]
 
@@ -589,7 +585,7 @@ func _combat_round() -> void:
 		return
 
 	# Daño con ATK/DEF + flags (block/graze/crit)
-	var res_you := Combat.compute_avatar_hit_detail(GameData.avatar, current_enemy, "MELEE")
+	var res_you := Combat.compute_avatar_hit_detail(GameData.get_avatar_state(), current_enemy, "MELEE")
 	var dmg_you: int = int(res_you["dmg"])
 	var flags_you: Dictionary = res_you["flags"]
 
@@ -624,45 +620,6 @@ func _combat_round() -> void:
 
 func _exit_tree() -> void:
 	Engine.time_scale = 1.0
-
-func apply_avatar_damage(amount: int) -> void:
-	# Resta HP y dispara el chequeo de auto-poción
-	if amount <= 0:
-		return
-	var av = GameData.avatar
-	var hp_max := int(av.get("hp_max", av.get("max_hp", 0)))
-	var hp_cur := int(av.get("hp", 0))
-	var new_hp: int = int(max(hp_cur - amount, 0))
-	GameData.avatar["hp"] = new_hp
-	print("[DMG] -%d HP (%d → %d / %d)" % [amount, hp_cur, new_hp, hp_max])
-	_auto_potion_after_damage(hp_max, new_hp)
-
-func _auto_potion_after_damage(hp_max: int, hp_cur: int) -> void:
-	if hp_max <= 0:
-		return
-	var thresh := int(ceil(float(hp_max) * auto_potion_threshold))
-	var in_danger := hp_cur <= thresh
-
-	# salí del peligro → reseteo anti-spam
-	if not in_danger and _auto_potion_suppressed_until_safe:
-		_auto_potion_suppressed_until_safe = false
-		return
-	if not in_danger:
-		return
-
-	# intentar usar 1 poción desde la BOLSA
-	if GameData.bag_has(auto_potion_item_id, 1):
-		if GameData.bag_consume(auto_potion_item_id, 1):
-			var healed: int = GameData.apply_potion_effect(auto_potion_item_id)
-			print("[POTION] Auto-uso: +%d HP (restantes=%d)" % [
-				healed, GameData.bag_count(auto_potion_item_id)
-			])
-			return
-
-	# no hay pociones → decirlo una sola vez hasta salir de peligro
-	if not _auto_potion_suppressed_until_safe:
-		_auto_potion_suppressed_until_safe = true
-		print("[AVATAR] ¡Arghhh, me quedé sin pociones!")
 
 func _compose_items_block() -> String:
 	# Usa la bolsa del run (_result_bag). Si está vacía, cae a run_rewards["items"].
