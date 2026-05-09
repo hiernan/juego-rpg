@@ -11,3 +11,5 @@ Esto deja preparado el camino para extraer un futuro `DataCatalog` que cargue en
 El loader de `items.csv` tambien vive en `DataLoaders.gd`. Conserva el contrato actual del diccionario `items`: `name`, `kind`, `subkind`, `rarity`, `tooltip_extra`, `heal_pct`, `heal_hp`, `price`, `max_stack` y `stackable`.
 
 Los loaders de `weapons.csv` y `armors.csv` tambien fueron movidos a `DataLoaders.gd`. `GameData.gd` mantiene `_load_weapons()` y `_load_armors()` solo como fachada de compatibilidad.
+
+El loader de `enemies.csv` tambien se movio a `DataLoaders.gd`, incluyendo soporte para la columna opcional `armor`.

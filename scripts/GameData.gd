@@ -234,32 +234,7 @@ func get_shop_price(shop: String, id: String) -> int:
 
 # --- Loaders específicos ---
 func _load_enemies(path: String) -> void:
-	var data := _read_csv(path)
-	if data.is_empty(): return
-	var headers: PackedStringArray = data[0]
-	var rows: Array = data[1]
-	var col: Dictionary = {}
-	for i in range(headers.size()):
-		col[headers[i]] = i
-
-	for r in rows:
-		var row: PackedStringArray = r
-		var id: String = (row[col["id"]] as String)
-		var item := {
-			"name": row[col["name"]],
-			"hp_min": _to_int(row[col["hp_min"]]),
-			"hp_max": _to_int(row[col["hp_max"]]),
-			"dmg_min": _to_int(row[col["dmg_min"]]),
-			"dmg_max": _to_int(row[col["dmg_max"]]),
-			"gold_min": _to_int(row[col["gold_min"]]),
-			"gold_max": _to_int(row[col["gold_max"]]),
-			"xp": _to_int(row[col["xp"]])
-		}
-		# NUEVO: armor plana si la columna existe
-		if col.has("armor"):
-			item["armor"] = _to_int(row[col["armor"]])
-
-		enemies[id] = item
+	enemies = DataLoadersScript.load_enemies(path)
 
 func _load_weapons(path: String) -> void:
 	weapons = DataLoadersScript.load_weapons(path)

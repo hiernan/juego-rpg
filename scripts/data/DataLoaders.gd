@@ -76,6 +76,37 @@ static func load_weapons(path: String) -> Dictionary:
 	return result
 
 
+static func load_enemies(path: String) -> Dictionary:
+	var result: Dictionary = {}
+	var data := CsvLoaderScript.read_csv(path)
+	if data.is_empty():
+		return result
+
+	var headers: PackedStringArray = data[0]
+	var idx := _header_index(headers)
+	for r in data[1]:
+		var row: PackedStringArray = r
+		var id := _get_col(row, idx, "id")
+		if id == "":
+			continue
+
+		var item := {
+			"name": _get_col(row, idx, "name"),
+			"hp_min": _to_int_default(_get_col(row, idx, "hp_min")),
+			"hp_max": _to_int_default(_get_col(row, idx, "hp_max")),
+			"dmg_min": _to_int_default(_get_col(row, idx, "dmg_min")),
+			"dmg_max": _to_int_default(_get_col(row, idx, "dmg_max")),
+			"gold_min": _to_int_default(_get_col(row, idx, "gold_min")),
+			"gold_max": _to_int_default(_get_col(row, idx, "gold_max")),
+			"xp": _to_int_default(_get_col(row, idx, "xp")),
+		}
+		if idx.has("armor"):
+			item["armor"] = _to_int_default(_get_col(row, idx, "armor"))
+
+		result[id] = item
+	return result
+
+
 static func load_armors(path: String) -> Dictionary:
 	var result: Dictionary = {}
 	var data := CsvLoaderScript.read_csv(path)
