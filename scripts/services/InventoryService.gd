@@ -179,8 +179,8 @@ static func move_item(game_data, from: String, to: String, id: String, qty: int 
 	if from == to:
 		return true
 
-	var kind := game_data.get_item_kind(id)
-	var stack := is_stackable(game_data, id)
+	var kind: String = game_data.get_item_kind(id)
+	var stack: bool = is_stackable(game_data, id)
 	var from_ref: Variant = get_container_ref(game_data, from)
 
 	var removed := false
