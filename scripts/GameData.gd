@@ -2,6 +2,7 @@ extends Node
 
 const InventoryServiceScript = preload("res://scripts/services/InventoryService.gd")
 const ShopServiceScript = preload("res://scripts/services/ShopService.gd")
+const CsvLoaderScript = preload("res://scripts/data/CsvLoader.gd")
 
 # --- Diccionarios globales (por id) ---
 var enemies: Dictionary = {}			# id: {name, hp_min, hp_max, ...}
@@ -162,38 +163,17 @@ func load_all() -> void:
 
 # --- Helpers de parsing ---
 static func _to_int(s: String) -> int:
-	return int(s.strip_edges())
+	return CsvLoaderScript.to_int(s)
 
 static func _to_float(s: String) -> float:
-	return float(s.strip_edges())
+	return CsvLoaderScript.to_float(s)
 
 static func _to_list(s: String, sep: String = ";") -> Array[String]:
-	if s == "" or s.strip_edges().is_empty():
-		return []
-	var parts: PackedStringArray = s.split(sep, false)
-	var out: Array[String] = []
-	for p in parts:
-		out.append(p.strip_edges())
-	return out
+	return CsvLoaderScript.to_list(s, sep)
 
 # Lee un CSV y devuelve (headers, rows) donde rows es Array de PackedStringArray
 static func _read_csv(path: String) -> Array:
-	var f := FileAccess.open(path, FileAccess.READ)
-	if f == null:
-		push_error("No se pudo abrir: %s" % path)
-		return []
-	var headers: PackedStringArray = []
-	if not f.eof_reached():
-		headers = f.get_csv_line()		# cabecera
-	var rows: Array = []
-	while not f.eof_reached():
-		var line: PackedStringArray = f.get_csv_line()
-		# Saltear filas vacías
-		if line.size() == 1 and line[0].strip_edges() == "":
-			continue
-		rows.append(line)
-	f.close()
-	return [headers, rows]
+	return CsvLoaderScript.read_csv(path)
 
 # --- Tiendas / Economía ---
 var shops: Dictionary = {
