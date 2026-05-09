@@ -5,6 +5,7 @@ const ShopServiceScript = preload("res://scripts/services/ShopService.gd")
 const CombatFormulaServiceScript = preload("res://scripts/services/CombatFormulaService.gd")
 const LootBagServiceScript = preload("res://scripts/services/LootBagService.gd")
 const ItemCatalogServiceScript = preload("res://scripts/services/ItemCatalogService.gd")
+const AvatarServiceScript = preload("res://scripts/services/AvatarService.gd")
 const DataLoadersScript = preload("res://scripts/data/DataLoaders.gd")
 const DataCatalogScript = preload("res://scripts/data/DataCatalog.gd")
 
@@ -58,65 +59,22 @@ static func pick_random(arr: Array) -> Variant:
 
 # --- Helpers Avatar ---
 func get_weapon_damage_range() -> Vector2i:
-	var wid: String = String(avatar.get("weapon_id", ""))
-	if wid == "" or not weapons.has(wid):
-		return Vector2i(1, 2)	# manos peladas
-	var w: Dictionary = weapons[wid]
-	return Vector2i(int(w.get("dmg_min", 1)), int(w.get("dmg_max", 2)))
+	return AvatarServiceScript.get_weapon_damage_range(self)
 
 func get_armor_value() -> int:
-	var aid: String = String(avatar.get("armor_id", ""))
-	if aid == "" or not armors.has(aid):
-		return 0
-	var a: Dictionary = armors[aid]
-	return int(a.get("armor", 0))
+	return AvatarServiceScript.get_armor_value(self)
 
 func apply_damage(amount: int) -> void:
-	# Restar vida del avatar
-	var av = avatar
-	var hp_max: int = int(av.get("hp_max", av.get("max_hp", 0)))
-	var hp_cur: int = int(av.get("hp", 0))
-	var damage: int = max(amount, 0)
-	var new_hp: int = int(max(hp_cur - damage, 0))
-	avatar["hp"] = new_hp
-	print("[DMG] -%d HP (%d → %d / %d)" % [damage, hp_cur, new_hp, hp_max])
-
-	# Autopoción: chequeo inmediato post-daño usando la BOLSA
-	if hp_max > 0:
-		var thresh: int = int(ceil(float(hp_max) * auto_potion_threshold))
-		var in_danger: bool = new_hp <= thresh
-
-		# Si salimos del peligro, reseteamos el anti-spam
-		if not in_danger and _auto_potion_suppressed:
-			_auto_potion_suppressed = false
-
-		if in_danger:
-			# Elegir la MEJOR curativa disponible en la bolsa (según CSV)
-			var potion_id: String = pick_best_heal_from_bag()
-			if potion_id != "" and bag_has(potion_id, 1):
-				if bag_consume(potion_id, 1):
-					var healed: int = apply_potion_effect(potion_id)
-					print("[POTION] Auto-uso: +%d HP (restantes=%d, id=%s)" % [healed, bag_count(potion_id), potion_id])
-					return
-			# No hay curativas → aviso una sola vez hasta salir del umbral
-			if not _auto_potion_suppressed:
-				_auto_potion_suppressed = true
-				print("[AVATAR] ¡Arghhh, me quedé sin pociones!")
+	AvatarServiceScript.apply_damage(self, amount)
 
 func heal(amount: int) -> void:
-	var hp: int = int(avatar["hp"])
-	var mhp: int = int(avatar["max_hp"])
-	avatar["hp"] = min(mhp, hp + max(0, amount))
+	AvatarServiceScript.heal(self, amount)
 
 func is_dead() -> bool:
-	return int(avatar["hp"]) <= 0
+	return AvatarServiceScript.is_dead(self)
 
 func on_death() -> void:
-	# Pierde equipo, mantiene nivel/xp. Resucita con vida completa.
-	avatar["weapon_id"] = ""
-	avatar["armor_id"] = ""
-	avatar["inventory"] = []
-	avatar["hp"] = avatar["max_hp"]
+	AvatarServiceScript.on_death(self)
 
 static func pick_weighted(entries: Array) -> Dictionary:
 	var total := 0
@@ -214,11 +172,10 @@ func _load_texts(path: String) -> void:
 	#equipment["weapon"] = id
 
 func get_equipped_armor_id() -> String:
-	var v = equipment.get("armor", null)
-	return v if v is String else ""
+	return AvatarServiceScript.get_equipped_armor_id(self)
 
 func set_equipped_armor_id(id: String) -> void:
-	equipment["armor"] = id
+	AvatarServiceScript.set_equipped_armor_id(self, id)
 
 # --- Helpers para mover 1 unidad por id simple ---
 func _remove_one(arr: Array, id: String) -> bool:
@@ -255,14 +212,10 @@ func equip_weapon(id: String, from_src: String) -> void:
 	# Events.player_state_changed.emit("weapon_changed")
 
 func get_equipped_weapon_id() -> String:
-	return str(avatar.get("weapon_id", ""))
+	return AvatarServiceScript.get_equipped_weapon_id(self)
 
 func set_equipped_weapon_id(id: String) -> void:
-	# Asegura que el arma equipada vive en avatar["weapon_id"]
-	if not avatar.has("weapon_id"):
-		avatar["weapon_id"] = ""
-	avatar["weapon_id"] = id
-	print("[GD] set_equipped_weapon_id -> ", id)
+	AvatarServiceScript.set_equipped_weapon_id(self, id)
 
 func inventory_add(id: String) -> void:
 	inventory.append(id)
