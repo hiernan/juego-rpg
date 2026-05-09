@@ -3,6 +3,7 @@ extends Control
 var mission_time_scale: float = 2.0	# 1.0 normal, 2.0 el doble, 0.5 más lento
 const MissionGen = preload("res://scripts/MissionGen.gd")
 const Combat = preload("res://scripts/Combat.gd")
+const MissionRunnerServiceScript = preload("res://scripts/services/MissionRunnerService.gd")
 
 # UI base
 @onready var label_titulo: Label = %LabelTitulo
@@ -216,47 +217,17 @@ func _on_timer_dots_timeout() -> void:
 	line_queue.append("[INLINE]\n")
 	
 	var ev: Dictionary = dots_plan.get("ev", {})
+	var resolution: Dictionary = MissionRunnerServiceScript.resolve_search_room(GameData, ev)
 	var result_lines: Array = []
+	for line in (resolution.get("lines", []) as Array):
+		result_lines.append(_fmt_gm(String(line)))
 
-	# loot table (nuevo esquema item_id)
-	var lt_id: String = String(ev.get("loot_table_id", ""))
-	if lt_id != "" and GameData.has_loot_table(lt_id):
-		var entries: Array = GameData.get_loot_table_entries(lt_id)
-		var pick := GameData.pick_weighted(entries)
-		var item_id: String = String(pick.get("item_id", ""))
-
-		if item_id == "" or item_id == "nothing":
-			result_lines.append(_fmt_gm("No encontrás nada."))
-			# no aplicar nada
-		else:
-			match item_id:
-				"gold_small":
-					var amount := randi_range(8, 12)
-					result_lines.append(_fmt_gm("Encontrás %d de oro." % amount))
-					_enqueue_apply_reward(amount, 0, [])
-				"gold_medium":
-					var amount2 := randi_range(20, 30)
-					result_lines.append(_fmt_gm("Encontrás %d de oro." % amount2))
-					_enqueue_apply_reward(amount2, 0, [])
-				"potion_small":
-					result_lines.append(_fmt_gm("Encontrás una poción menor de curación."))
-					_enqueue_apply_reward(0, 0, ["potion_small"])
-				_:
-					if GameData.has_weapon(item_id):
-						var wname: String = GameData.get_item_display_name(item_id)
-						result_lines.append(_fmt_gm("Encontrás un %s." % wname))
-						_enqueue_apply_reward(0, 0, [item_id])
-					elif GameData.has_armor(item_id):
-						var aname: String = GameData.get_item_display_name(item_id)
-						result_lines.append(_fmt_gm("Encontrás %s." % aname))
-						_enqueue_apply_reward(0, 0, [item_id])
-					else:
-						result_lines.append(_fmt_gm("Encontrás algo interesante."))
-						# sin aplicar (desconocido)
-	else:
-		# Fallback (por si la locación no trajo loot_table)
-		result_lines.append(_fmt_gm("Encontrás 9 de oro."))
-		_enqueue_apply_reward(9, 0, [])
+	var rewards: Dictionary = resolution.get("rewards", {})
+	var reward_gold: int = int(rewards.get("gold", 0))
+	var reward_xp: int = int(rewards.get("xp", 0))
+	var reward_items: Array = (rewards.get("items", []) as Array).duplicate()
+	if reward_gold > 0 or reward_xp > 0 or not reward_items.is_empty():
+		_enqueue_apply_reward(reward_gold, reward_xp, reward_items)
 
 	_enqueue_lines(result_lines, 1.0)
 		# reanudar el loop
@@ -274,26 +245,7 @@ func _scroll_to_bottom() -> void:
 func _resolve_enemy_as_lines(ev: Dictionary) -> void:
 	# 1) Cargar definición
 	var enemy_id: String = String(ev.get("id", "goblin"))
-	var def: Dictionary = GameData.get_enemy(enemy_id)
-	current_enemy = {
-		"id": enemy_id,
-		"name": String(def.get("name", enemy_id.capitalize())),
-		"hp_max": int(def.get("hp_max", def.get("hp", 8))),	# por si tus CSV tenían "hp"
-		"hp": int(def.get("hp_min", 6)),						# elegimos dentro del rango
-		"dmg_min": int(def.get("dmg_min", 1)),
-		"dmg_max": int(def.get("dmg_max", 3)),
-		"armor": int(def.get("armor", def.get("defense", 0))),	# ← NUEVO: armadura plana desde CSV
-		"gold_min": int(def.get("gold_min", 1)),
-		"gold_max": int(def.get("gold_max", 4)),
-		"xp": int(def.get("xp", 3)),
-		"evasion": float(def.get("evasion", Combat.DODGE_ENEMY_DEFAULT)),
-		"level": int(def.get("level", 1))
-	}
-	# Si tenés hp_min/hp_max en CSV, usá ambos:
-	var hpmin := int(def.get("hp_min", current_enemy["hp"]))
-	var hpmax := int(def.get("hp_max", max(hpmin, int(current_enemy["hp_max"]))))
-	current_enemy["hp"] = randi_range(hpmin, hpmax)
-	current_enemy["hp_max"] = hpmax
+	current_enemy = MissionRunnerServiceScript.build_enemy_instance(GameData, enemy_id)
 
 	var enemy_name: String = String(current_enemy["name"])
 
