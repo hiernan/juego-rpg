@@ -659,76 +659,9 @@ func get_item_kind(id: String) -> String:
 	return "item"
 
 func move_item_between_containers(from: String, to: String, id: String, amount: int) -> bool:
-	# Mueve 1 unidad del item 'id' entre:
-	#   inventory | stash | equipped_weapon | equipped_armor
-	# Soporta swap: si equipa y había algo, lo manda al inventory.
-	# Devuelve true si pudo mover; false si no.
-	if id == "":
-		return false
+	return InventoryServiceScript.move_item_between_containers(self, from, to, id, amount)
 
-	var av: Dictionary = avatar
-	var inv: Array = av.get("inventory", [])
-	var stash: Array = av.get("stash", [])
-	var wid: String = str(av.get("weapon_id", ""))
-	var aid: String = str(av.get("armor_id", ""))
 
-	var removed: bool = false
-
-	# --- quitar del origen ---
-	if from == "inventory":
-		var i: int = inv.find(id)
-		if i != -1:
-			inv.remove_at(i)
-			removed = true
-	elif from == "stash":
-		var j: int = stash.find(id)
-		if j != -1:
-			stash.remove_at(j)
-			removed = true
-	elif from == "equipped_weapon":
-		if wid == id:
-			av["weapon_id"] = ""
-			removed = true
-	elif from == "equipped_armor":
-		if aid == id:
-			av["armor_id"] = ""
-			removed = true
-
-	if not removed:
-		# no estaba en el origen; no hacemos nada
-		return false
-
-	# --- agregar al destino ---
-	if to == "inventory":
-		inv.append(id)
-
-	elif to == "stash":
-		stash.append(id)
-
-	elif to == "equipped_weapon":
-		# si había arma, va al inventory
-		if wid != "":
-			inv.append(wid)
-		av["weapon_id"] = id
-
-	elif to == "equipped_armor":
-		# si había armadura, va al inventory
-		if aid != "":
-			inv.append(aid)
-		av["armor_id"] = id
-
-	else:
-		# destino desconocido -> revert (volver al origen básico: inventory)
-		inv.append(id)
-
-	# --- escribir cambios ---
-	av["inventory"] = inv
-	av["stash"] = stash
-	avatar = av
-
-	return true
-
-# ¿Es stackeable? (por ahora solo items comunes)
 func is_stackable(id: String) -> bool:
 	return InventoryServiceScript.is_stackable(self, id)
 
@@ -769,92 +702,8 @@ func _set_container_ref(name: String, value: Variant) -> void:
 # id:   canonical id
 # qty:  cantidad (default 1; ignorado para no-stackeables)
 func move_item(from: String, to: String, id: String, qty: int = 1) -> bool:
-	# Validaciones rápidas
-	if id == "" or not CONTAINERS.has(from) or not CONTAINERS.has(to):
-		return false
-	if from == to:
-		return true  # no-op
+	return InventoryServiceScript.move_item(self, from, to, id, qty)
 
-	var kind := get_item_kind(id)
-	var stack := is_stackable(id)
-
-	# Obtener referencias
-	var from_ref: Variant = _get_container_ref(from)
-	var to_ref: Variant  = _get_container_ref(to)
-
-	# Quitar del origen
-	var removed := false
-	if stack:
-		# Arrays: inventory/stash
-		if from == "inventory" or from == "stash":
-			var arr: Array = from_ref
-			var removed_any := false
-			var left := qty
-			while left > 0:
-				var idx := arr.find(id)
-				if idx == -1:
-					break
-				arr.remove_at(idx)
-				removed_any = true
-				left -= 1
-			removed = removed_any
-
-			_set_container_ref(from, arr)
-		else:
-			# No debería sacar stacks de slots
-			return false
-	else:
-		# No stackeables: si viene de slot, limpiar; si viene de array, erase 1
-		if from == "equipped_weapon" or from == "equipped_armor":
-			if String(from_ref) == id:
-				removed = true
-				_set_container_ref(from, "")
-			else:
-				return false
-		else:
-			var arr2: Array = from_ref
-			var removed_any2 := false
-			var left2 := qty
-			while left2 > 0:
-				var idx2 := arr2.find(id)
-				if idx2 == -1:
-					break
-				arr2.remove_at(idx2)
-				removed_any2 = true
-				left2 -= 1
-			removed = removed_any2
-
-			_set_container_ref(from, arr2)
-
-	if not removed:
-		return false
-
-	# Agregar al destino
-	if to == "inventory" or to == "stash":
-		var arr3: Array = _get_container_ref(to)
-		arr3.append(id)
-		_set_container_ref(to, arr3)
-		return true
-
-	# Destino es un slot: validar compatibilidad
-	if to == "equipped_weapon" and kind != "weapon":
-		# devolver al origen para no perder nada
-		move_item(to, from, id, 1) # noop seguro si no llegó a ponerse
-		return false
-	if to == "equipped_armor" and kind != "armor":
-		move_item(to, from, id, 1)
-		return false
-
-	# Si ya hay algo equipado en ese slot → swap al inventory
-	var prev: Variant = _get_container_ref(to)
-	if String(prev) != "":
-		var inv: Array = _get_container_ref("inventory")
-		inv.append(String(prev))
-		_set_container_ref("inventory", inv)
-
-	# Equipar
-	_set_container_ref(to, id)
-	return true
 # --------------------------------------------------------------------------
 
 # ─────────────────────────────────────────────────────────────────────
@@ -871,46 +720,14 @@ func give_item(to: String, id: String, amount: int = 1) -> bool:
 # Equip genérico con swap (lo anterior -> inventory)
 
 func swap_equip(slot_kind: String, new_id: String) -> bool:
-	# slot_kind: "weapon" | "armor"
-	if new_id == "":
-		return false
+	return InventoryServiceScript.swap_equip(self, slot_kind, new_id)
 
-	var expected_kind: String = slot_kind
-	var k: String = get_item_kind(new_id)
-	if k != expected_kind:
-		return false
-
-	var slot_name := ""
-	if slot_kind == "weapon":
-		slot_name = "equipped_weapon"
-	elif slot_kind == "armor":
-		slot_name = "equipped_armor"
-	else:
-		return false
-
-	# guardar qué había antes
-	var current := String(_get_container_ref(slot_name))
-
-	# equipar nuevo
-	_set_container_ref(slot_name, String(new_id))
-
-	# si realmente había algo, mandarlo a inventario
-	if current != "" and current != new_id:
-		var inv: Array = _get_container_ref("inventory")
-		if typeof(inv) == TYPE_ARRAY:
-			inv.append(current)
-			_set_container_ref("inventory", inv)
-
-	return true
 
 # ─────────────────────────────────────────────────────────────────────
 
 func get_equipped_id(slot_kind: String) -> String:
-	if slot_kind == "weapon":
-		return String(_get_container_ref("equipped_weapon"))
-	elif slot_kind == "armor":
-		return String(_get_container_ref("equipped_armor"))
-	return ""
+	return InventoryServiceScript.get_equipped_id(self, slot_kind)
+
 
 # ─────────────────────────────────────────────────────────────────────
 # LOOT BAG — bolsa temporal de botín durante misión
